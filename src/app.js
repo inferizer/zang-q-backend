@@ -3,6 +3,7 @@ const express = require("express");
 const morgan = require("morgan");
 const cors = require("cors");
 const authRoute = require("./route/auth-router");
+const vendorRoute = require('./route/vendor-route')
 const notFoundMiddleware = require("./middlewares/not-founded");
 const errorMiddleware = require("./middlewares/error");
 
