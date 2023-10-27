@@ -9,9 +9,9 @@ datasource db {
 
 model Users {
   id          Int           @id @default(autoincrement())
-  username    String?
-  email       String?
-  mobile      String?
+  username    String?       @unique
+  email       String?       @unique
+  mobile      String?       @unique
   facebookId  String?
   googleId    String?
   lineId      String?
@@ -20,7 +20,7 @@ model Users {
   isActive    Boolean       @default(true)
   banCount    Int           @default(0)
   role        Role
-  Resevations Resevations[]
+  resevations Resevations[]
 }
 
 model Resevations {
@@ -39,7 +39,7 @@ model Resevations {
 model Shops {
   id                 Int           @id @default(autoincrement())
   name               String
-  email              String?
+  email              String        @unique
   password           String
   address            String
   shopMobile         String
@@ -49,10 +49,10 @@ model Shops {
   picture            String
   priceRange         PriceRange
   isOpen             Boolean       @default(true)
-  isApprove          is_approve    @default(pending)
-  Resevations        Resevations[]
-  Categories         Categories[]
-  Branchs            Branchs[]
+  isApprove          IsApprove     @default(pending)
+  resevations        Resevations[]
+  categories         Categories[]
+  branchs            Branchs[]
 }
 
 model Categories {
@@ -67,7 +67,7 @@ model Categories {
 model Type {
   id         Int          @id @default(autoincrement())
   name       String
-  Categories Categories[]
+  categories Categories[]
 }
 
 model Branchs {
@@ -75,8 +75,8 @@ model Branchs {
   shopId      Int
   shop        Shops         @relation(fields: [shopId], references: [id])
   name        String
-  Resevations Resevations[]
-  Location    Location[]
+  resevations Resevations[]
+  location    Location[]
 }
 
 model Location {
@@ -102,16 +102,11 @@ enum Status {
 
 enum PriceRange {
   cheap
-  middle
+  resonable
   expensive
 }
 
-enum is_open {
-  open
-  close
-}
-
-enum is_approve {
+enum IsApprove {
   pending
   approved
   rejected
