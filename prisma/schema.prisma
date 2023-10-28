@@ -6,3 +6,108 @@ datasource db {
   provider = "mysql"
   url      = env("DATABASE_URL")
 }
+
+model Users {
+  id          Int           @id @default(autoincrement())
+  username    String?
+  email       String?
+  mobile      String?
+  facebookId  String?
+  googleId    String?
+  lineId      String?
+  password    String?
+  location    String
+  isActive    Boolean       @default(true)
+  banCount    Int           @default(0)
+  role        Role
+  Resevations Resevations[]
+}
+
+model Resevations {
+  id          Int      @id @default(autoincrement())
+  userId      Int
+  user        Users    @relation(fields: [userId], references: [id])
+  shopId      Int
+  shop        Shops    @relation(fields: [shopId], references: [id])
+  branchId    Int
+  branch      Branchs  @relation(fields: [branchId], references: [id])
+  queueNumber Int
+  status      Status
+  createdAt   DateTime @default(now())
+}
+
+model Shops {
+  id                 Int           @id @default(autoincrement())
+  name               String
+  email              String?
+  password           String
+  address            String
+  shopMobile         String
+  openingTimes       String
+  closeingTimes      String
+  currentQueueNumber Int
+  picture            String
+  priceRange         PriceRange
+  isOpen             Boolean       @default(true)
+  isApprove          is_approve    @default(pending)
+  Resevations        Resevations[]
+  Categories         Categories[]
+  Branchs            Branchs[]
+}
+
+model Categories {
+  id     Int    @id @default(autoincrement())
+  typeId Int
+  type   Type   @relation(fields: [typeId], references: [id])
+  shopId Int
+  shop   Shops  @relation(fields: [shopId], references: [id])
+  name   String
+}
+
+model Type {
+  id         Int          @id @default(autoincrement())
+  name       String
+  Categories Categories[]
+}
+
+model Branchs {
+  id          Int           @id @default(autoincrement())
+  shopId      Int
+  shop        Shops         @relation(fields: [shopId], references: [id])
+  name        String
+  Resevations Resevations[]
+  Location    Location[]
+}
+
+model Location {
+  id       Int     @id @default(autoincrement())
+  branchId Int
+  branch   Branchs @relation(fields: [branchId], references: [id])
+  lat      String
+  long     String
+}
+
+enum Role {
+  user
+  shop_admin
+  shop_super_admin
+  super_admin
+}
+
+enum Status {
+  waiting
+  arrival
+  cancelled
+}
+
+enum PriceRange {
+  cheap
+  middle
+  expensive
+}
+
+enum is_approve {
+  pending
+  approved
+  rejected
+}
