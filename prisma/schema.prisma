@@ -16,7 +16,7 @@ model Users {
   googleId    String?
   lineId      String?
   password    String?
-  location    String
+  location    String?
   isActive    Boolean       @default(true)
   banCount    Int           @default(0)
   role        Role          @default(user)
@@ -44,16 +44,16 @@ model Resevations {
 
 model Shops {
   id                 Int           @id @default(autoincrement())
-  name               String
+  name               String?
   email              String        @unique
   password           String
-  address            String
-  shopMobile         String
-  openingTimes       String
-  closeingTimes      String
-  currentQueueNumber Int
-  picture            String
-  priceRange         PriceRange
+  address            String?
+  shopMobile         String?
+  openingTimes       String?
+  closeingTimes      String?
+  currentQueueNumber Int?
+  picture            String?
+  priceRange         PriceRange?
   isOpen             Boolean       @default(true)
   isApprove          IsApprove     @default(pending)
   resevations        Resevations[]

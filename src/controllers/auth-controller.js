@@ -5,12 +5,38 @@ const createError = require('../utils/create-error');
 const { UserRegisterSchema, UserLoginSchema } = require('../validator/auth-validator');
 const prisma = require('../models/prisma')
 
-exports.register = async (req,res,next) => {
+
+exports.userRegister = async (req,res,next) => {
     try {
+      
         const { value, error } = UserRegisterSchema.validate(req.body);
         if (error) {
           return next(error)
         }
+        value.role = "user"
+        value.password = await bcrypt.hash(value.password, 10);
+        const user = await prisma.users.create({
+          data: value
+        });
+        const payload = { userId: user.id };
+        const accessToken = jwt.sign(payload, process.env.JWT_SECRET_KEY || 'qwertyuiop', {
+          expiresIn: process.env.JWT_EXPIRE
+        });
+        res.status(201).json({ accessToken, user });
+      } catch (err) {
+        next(err);
+      }
+    };
+
+
+exports.vendorAdminRegister = async (req,res,next) => {
+    try {
+      
+        const { value, error } = UserRegisterSchema.validate(req.body);
+        if (error) {
+          return next(error)
+        }
+        value.role = "user"
         value.password = await bcrypt.hash(value.password, 10);
         const user = await prisma.users.create({
           data: value

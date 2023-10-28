@@ -25,8 +25,8 @@ const UserRegisterSchema = Joi.object({
     is: Joi.string().email(),
     then: Joi.string().default(Joi.ref("emailOrMobile")),
   }),
-  location: Joi.string().trim().required(), // กลับมาเเก้ทีหลัง ต้องการ location ที่เเน่นอน
-  role: Joi.string().trim().required(), // edit db schema to Default user
+   
+   
 });
 exports.UserRegisterSchema = UserRegisterSchema;
 
