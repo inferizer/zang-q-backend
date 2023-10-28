@@ -19,9 +19,15 @@ model Users {
   location    String
   isActive    Boolean       @default(true)
   banCount    Int           @default(0)
-  role        Role
+  role        Role          @default(user)
   resevations Resevations[]
 }
+
+// model UserLocation {
+//   id   Int    @id @default(autoincrement())
+//   lat  String
+//   long String
+// }
 
 model Resevations {
   id          Int      @id @default(autoincrement())
