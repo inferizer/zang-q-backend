@@ -9,9 +9,9 @@ datasource db {
 
 model Users {
   id          Int           @id @default(autoincrement())
-  username    String?
-  email       String?
-  mobile      String?
+  username    String?       @unique
+  email       String?       @unique
+  mobile      String?       @unique
   facebookId  String?
   googleId    String?
   lineId      String?
@@ -19,9 +19,15 @@ model Users {
   location    String
   isActive    Boolean       @default(true)
   banCount    Int           @default(0)
-  role        Role
-  Resevations Resevations[]
+  role        Role          @default(user)
+  resevations Resevations[]
 }
+
+// model UserLocation {
+//   id   Int    @id @default(autoincrement())
+//   lat  String
+//   long String
+// }
 
 model Resevations {
   id          Int      @id @default(autoincrement())
@@ -39,7 +45,7 @@ model Resevations {
 model Shops {
   id                 Int           @id @default(autoincrement())
   name               String
-  email              String?
+  email              String        @unique
   password           String
   address            String
   shopMobile         String
@@ -49,10 +55,10 @@ model Shops {
   picture            String
   priceRange         PriceRange
   isOpen             Boolean       @default(true)
-  isApprove          is_approve    @default(pending)
-  Resevations        Resevations[]
-  Categories         Categories[]
-  Branchs            Branchs[]
+  isApprove          IsApprove     @default(pending)
+  resevations        Resevations[]
+  categories         Categories[]
+  branchs            Branchs[]
 }
 
 model Categories {
@@ -67,7 +73,7 @@ model Categories {
 model Type {
   id         Int          @id @default(autoincrement())
   name       String
-  Categories Categories[]
+  categories Categories[]
 }
 
 model Branchs {
@@ -75,8 +81,8 @@ model Branchs {
   shopId      Int
   shop        Shops         @relation(fields: [shopId], references: [id])
   name        String
-  Resevations Resevations[]
-  Location    Location[]
+  resevations Resevations[]
+  location    Location[]
 }
 
 model Location {
@@ -102,10 +108,11 @@ enum Status {
 
 enum PriceRange {
   cheap
-  middle
+  resonable
   expensive
 }
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 enum is_open {
   open
@@ -115,6 +122,9 @@ enum is_open {
 =======
 >>>>>>> feature/prisma-database
 enum is_approve {
+=======
+enum IsApprove {
+>>>>>>> fea52a4ad5e2246e51433f6be893a142f8f39572
   pending
   approved
   rejected
