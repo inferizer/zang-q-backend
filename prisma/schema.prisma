@@ -106,11 +106,14 @@ enum PriceRange {
   expensive
 }
 
+<<<<<<< HEAD
 enum is_open {
   open
   close
 }
 
+=======
+>>>>>>> feature/prisma-database
 enum is_approve {
   pending
   approved
