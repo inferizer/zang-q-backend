@@ -9,9 +9,9 @@ datasource db {
 
 model Users {
   id          Int           @id @default(autoincrement())
-  username    String?
-  email       String?
-  mobile      String?
+  username    String?       @unique
+  email       String?       @unique
+  mobile      String?       @unique
   facebookId  String?
   googleId    String?
   lineId      String?
@@ -19,7 +19,7 @@ model Users {
   location    String?
   isActive    Boolean       @default(true)
   banCount    Int           @default(0)
-  role        Role
+  role        Role          @default(user)
   Resevations Resevations[]
 }
 
