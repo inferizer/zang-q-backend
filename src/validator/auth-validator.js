@@ -1,7 +1,7 @@
 const Joi = require("joi");
 
 const UserRegisterSchema = Joi.object({
-  username: Joi.string().trim().required(),
+  username: Joi.string(),
   emailOrMobile: Joi.alternatives([
     Joi.string().email(),
     Joi.string().pattern(/^[0-9]{10}$/),
@@ -29,8 +29,22 @@ const UserRegisterSchema = Joi.object({
 exports.UserRegisterSchema = UserRegisterSchema;
 
 const UserLoginSchema = Joi.object({
-  emailOrMobile: Joi.string().required(),
+  emailOrMobile: Joi.alternatives([
+    Joi.string().email(),
+    Joi.string().pattern(/^[0-9]{10}$/),
+  ])
+    .required()
+    .strip(),
   password: Joi.string().required(),
+  mobile: Joi.forbidden().when("emailOrMobile", {
+    is: Joi.string().pattern(/^[0-9]{10}$/),
+    then: Joi.string().default(Joi.ref("emailOrMobile")),
+  }),
+  email: Joi.forbidden().when("emailOrMobile", {
+    is: Joi.string().email(),
+    then: Joi.string().default(Joi.ref("emailOrMobile")),
+  }),
 });
+
 exports.UserLoginSchema = UserLoginSchema;
 // userSchema , adminShcema ,venderSchem

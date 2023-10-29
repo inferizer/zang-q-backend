@@ -6,6 +6,8 @@ const authRoute = require("./route/auth-router");
 const vendorRoute = require('./route/vendor-route')
 const notFoundMiddleware = require("./middlewares/not-founded");
 const errorMiddleware = require("./middlewares/error");
+const PORT = process.env.PORT || "5000";
+
 
 const app = express();
 
@@ -20,5 +22,4 @@ app.use("/vendor", vendorRoute);
 app.use(notFoundMiddleware);
 app.use(errorMiddleware);
 
-const PORT = process.env.PORT || "5000";
 app.listen(PORT, () => console.log(`server running on port: ${PORT}`));
