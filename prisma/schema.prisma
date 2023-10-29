@@ -9,9 +9,9 @@ datasource db {
 
 model Users {
   id          Int           @id @default(autoincrement())
-  username    String?       @unique
-  email       String?       @unique
-  mobile      String?       @unique
+  username    String?
+  email       String?
+  mobile      String?
   facebookId  String?
   googleId    String?
   lineId      String?
@@ -19,15 +19,9 @@ model Users {
   location    String?
   isActive    Boolean       @default(true)
   banCount    Int           @default(0)
-  role        Role          @default(user)
-  resevations Resevations[]
+  role        Role
+  Resevations Resevations[]
 }
-
-// model UserLocation {
-//   id   Int    @id @default(autoincrement())
-//   lat  String
-//   long String
-// }
 
 model Resevations {
   id          Int      @id @default(autoincrement())
@@ -55,10 +49,10 @@ model Shops {
   picture            String?
   priceRange         PriceRange?
   isOpen             Boolean       @default(true)
-  isApprove          IsApprove     @default(pending)
-  resevations        Resevations[]
-  categories         Categories[]
-  branchs            Branchs[]
+  isApprove          is_approve    @default(pending)
+  Resevations        Resevations[]
+  Categories         Categories[]
+  Branchs            Branchs[]
 }
 
 model Categories {
@@ -73,7 +67,7 @@ model Categories {
 model Type {
   id         Int          @id @default(autoincrement())
   name       String
-  categories Categories[]
+  Categories Categories[]
 }
 
 model Branchs {
@@ -81,8 +75,8 @@ model Branchs {
   shopId      Int
   shop        Shops         @relation(fields: [shopId], references: [id])
   name        String
-  resevations Resevations[]
-  location    Location[]
+  Resevations Resevations[]
+  Location    Location[]
 }
 
 model Location {
@@ -108,11 +102,11 @@ enum Status {
 
 enum PriceRange {
   cheap
-  resonable
+  middle
   expensive
 }
 
-enum IsApprove {
+enum is_approve {
   pending
   approved
   rejected
