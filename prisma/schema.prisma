@@ -62,11 +62,11 @@ model ShopAccount {
   id        Int     @id @default(autoincrement())
   email     String  @unique
   password  String
-  firstName String
-  lastName  String
+  firstName String?
+  lastName  String?
   mobile    String?
-  idNumber  String
-  idCard    String
+  idNumber  String?
+  idCard    String?
   role      String  @default("vendor")
   Shops     Shops[]
 }
