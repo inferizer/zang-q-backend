@@ -29,8 +29,6 @@ model Resevations {
   user        Users    @relation(fields: [userId], references: [id])
   shopId      Int
   shop        Shops    @relation(fields: [shopId], references: [id])
-  branchId    Int
-  branch      Branchs  @relation(fields: [branchId], references: [id])
   queueNumber Int
   status      Status
   createdAt   DateTime @default(now())
@@ -52,7 +50,16 @@ model Shops {
   isApprove          is_approve    @default(pending)
   Resevations        Resevations[]
   Categories         Categories[]
-  Branchs            Branchs[]
+  ShopAccount        ShopAccount[]
+}
+
+model ShopAccount {
+  id       Int     @id @default(autoincrement())
+  email    String
+  password String
+  isShop   Boolean @default(true)
+  shopId   Shops   @relation(fields: [shopsId], references: [id])
+  shopsId  Int
 }
 
 model Categories {
@@ -70,33 +77,20 @@ model Type {
   Categories Categories[]
 }
 
-model Branchs {
-  id          Int           @id @default(autoincrement())
-  shopId      Int
-  shop        Shops         @relation(fields: [shopId], references: [id])
-  name        String
-  Resevations Resevations[]
-  Location    Location[]
-}
-
 model Location {
-  id       Int     @id @default(autoincrement())
-  branchId Int
-  branch   Branchs @relation(fields: [branchId], references: [id])
-  lat      String
-  long     String
+  id   Int    @id @default(autoincrement())
+  lat  String
+  long String
 }
 
 enum Role {
   user
-  shop_admin
-  shop_super_admin
-  super_admin
+  admin
 }
 
 enum Status {
-  waiting
-  arrival
+  pending
+  accepted
   cancelled
 }
 
