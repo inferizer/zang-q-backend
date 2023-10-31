@@ -1,6 +1,9 @@
 const createError = require('../utils/create-error');
 const jwt = require('jsonwebtoken');
 const prisma = require('../models/prisma');
+const ADMIN = "admin"
+const VENDOR = "vendor"
+const USER = "user"
 
 module.exports = async (req, res, next) => {
   try {
@@ -12,17 +15,31 @@ module.exports = async (req, res, next) => {
     const token = authorization.split(' ')[1];
     const payload = jwt.verify(token, process.env.JWT_SECRET_KEY || 'qwertyuiop');
 
-    const user = await prisma.users.findUnique({
-      where: {
-        id: payload.userId
-      }
-    });
+    if(payload.role == VENDOR){
+      
+      const user =  await prisma.shopAccount.findUnique({
+        where:{
+          id: payload.userId
+        }
+      })
+      if (!user) return next(createError('unauthenticated', 401));
+      delete user.password
+      
+      req.user = user
 
-    if (!user) {
-      return next(createError('unauthenticated', 401));
+      return next()
+      
     }
-    delete user.password;
+  
+      const user = await prisma.users.findUnique({
+        where: {
+          id: payload.userId
+        }
+      });
+      if (!user) return next(createError('unauthenticated', 401));
+        delete user.password;
     req.user = user;
+      
     next();
   } catch (err) {
     if (err.name === 'TokenExpiredError' || err.name === 'JsonWebTokenError') {

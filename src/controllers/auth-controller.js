@@ -28,14 +28,33 @@ const user_login = async (value) =>{
 
 }
 
-exports.getAuthUser =  async (req,res,next) =>{
-
-  try{
-    const user = await prisma.users.findFirst({
+const check_role = async (req) => {
+  
+  const VENDOR = "vendor"
+  if(req.user.role == VENDOR) {
+    const user = await prisma.shopAccount.findUnique({
       where:{
         id:req.user.id
       }
-    }) 
+    })
+    
+  
+  
+  return user
+  }
+  
+  const user = await prisma.users.findFirst({
+    where:{
+      id: req.user.id
+    }
+  })
+  return user
+}
+exports.getAuthUser =  async (req,res,next) =>{
+
+  try{
+    const user =  await check_role(req) 
+    delete user.password
     if(!user) return next(createError("user not found",400))
     res.status(200).json({user})
   }
@@ -53,17 +72,17 @@ exports.register = async (req,res,next) => {
         const user = await prisma.users.create({
           data: value
         });
-        const payload = { userId: user.id };
+        
+        const payload = { userId: user.id,role:user.role };
         const accessToken = jwt.sign(payload, process.env.JWT_SECRET_KEY || 'qwertyuiop', {
           expiresIn: process.env.JWT_EXPIRE
         });
+        delete user.password
         res.status(201).json({ accessToken, user });
       } catch (err) {
         next(err);
       }
     };
-    
-
 exports.login = async (req, res, next) => {
         try {
           const { value, error } = UserLoginSchema.validate(req.body)
@@ -71,20 +90,15 @@ exports.login = async (req, res, next) => {
             return next(error);
           }
        const user = await user_login(value)
-          // const user = await prisma.user.findFirst({
-          //   where: {
-          //        userName: value.userName 
-          //   }
-          // });
           if (!user) {
             return next(createError('invalid Login', 400));
           }
-          console.log(user)
+          
           const compareMatch = await bcrypt.compare(value.password, user.password)
           if (!compareMatch) {
             return next(createError('invalid Login', 400));
           }
-          const payload = { userId: user.id };
+          const payload = { userId: user.id, role: user.role };
           const accessToken = jwt.sign(payload, process.env.JWT_SECRET_KEY || 'qwertyuiop', {
             expiresIn: process.env.JWT_EXPIRE
           });
