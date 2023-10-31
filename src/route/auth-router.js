@@ -1,7 +1,7 @@
 const express = require("express");
 const passport = require("passport");
 const { isLoggedIn } = require("../middlewares/isLoggedIn");
-const authController = require("../controllers/admin-controller");
+const authController = require("../controllers/auth-controller");
 
 const router = express.Router();
 
@@ -11,7 +11,16 @@ router.get(
   passport.authenticate("google", { scope: ["email", "profile"] })
 );
 
-router.get("/login", passport.authenticate, isLoggedIn, authController.login);
+router.get(
+  "/login",
+  (req, res, next) => {
+    console.log(passport, "passport");
+    next();
+  },
+
+  isLoggedIn,
+  authController.login
+);
 
 router.get(
   "/google/callback",

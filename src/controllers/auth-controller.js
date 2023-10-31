@@ -5,6 +5,34 @@ const createError = require("../utils/create-error");
 
 exports.login = async (req, res, next) => {
   try {
+    const user = await prisma.users.findFirst({
+      where: {
+        email: req.user.email,
+      },
+    });
+
+    if (user) {
+      const accessToken = jwt.sign(
+        { googleId: user.googleId, role: user.role },
+        process.env.JWT_SECRET_KEY || "defaultRandom"
+      );
+      res.json({ accessToken, user });
+    } else {
+      await prisma.users.create({
+        data: {
+          email: req.user.email,
+          googleId: req.user.id,
+        },
+      });
+      res.sendStatus(200);
+    }
+  } catch (error) {
+    next(error);
+  }
+};
+
+exports.getMe = async (req, res, next) => {
+  try {
     const user = await prisma.user.findFirst({
       where: {
         googleId: req.body.email,
@@ -23,19 +51,19 @@ exports.login = async (req, res, next) => {
           email: req.body.email,
         },
       });
-      res.sendStatus(200);
+      res.sendStatus(200).json({ msg: "not found" });
     }
   } catch (error) {
     next(error);
   }
 };
 
-exports.logout = async (req, res, next) => {
-  try {
-    req.logout();
-    req.session.destroy();
-    res.sendStatus(200);
-  } catch (error) {
-    next(error);
-  }
-};
+// exports.logout = async (req, res, next) => {
+//   try {
+//     req.logout();
+//     req.session.destroy();
+//     res.sendStatus(200);
+//   } catch (error) {
+//     next(error);
+//   }
+// };
