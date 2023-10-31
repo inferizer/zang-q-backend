@@ -1,7 +1,7 @@
 const express = require("express");
 const { isLoggedIn } = require("../middlewares/isLoggedIn");
 const passport = require("passport");
-const prisma = require("../models/prisma");
+const prisma = require("../models/prisma")
 
 const router = express.Router();
 
