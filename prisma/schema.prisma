@@ -38,17 +38,20 @@ model Resevations {
 
 model Shops {
   id                  Int           @id @default(autoincrement())
-  registerationNumber String
-  registertionPic     String
-  name                String?
-  email               String?       @unique
-  address             String?
-  shopMobile          String?
-  openingTimes        String?
-  closeingTimes       String?
+  registerationNumber String?
+  registertionPic     String?
+  shopName           String
+  shopLat             Float
+  shopLan             Float
+  shopMobile          String
+  openingTimes        String
+  closeingTimes       String
   currentQueueNumber  Int?
-  picture             String?
-  priceRange          PriceRange?
+  shopPicture         String
+  ownerFirstName      String
+  ownerLastName       String
+  idNumber            String
+  idCard              String
   isOpen              Boolean       @default(true)
   isApprove           is_approve    @default(pending)
   Resevations         Resevations[]
@@ -59,16 +62,11 @@ model Shops {
 }
 
 model ShopAccount {
-  id        Int     @id @default(autoincrement())
-  email     String  @unique
-  password  String
-  firstName String?
-  lastName  String?
-  mobile    String?
-  idNumber  String?
-  idCard    String?
-  role      String  @default("vendor")
-  Shops     Shops[]
+  id       Int    @id @default(autoincrement())
+  email    String @unique
+  password String
+  role  String  @default("vendor")
+  Shops Shops[]
 }
 
 model Categories {
@@ -114,11 +112,7 @@ enum Status {
   cancelled
 }
 
-enum PriceRange {
-  cheap
-  middle
-  expensive
-}
+
 
 enum is_approve {
   pending
