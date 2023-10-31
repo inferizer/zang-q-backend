@@ -28,7 +28,7 @@ const UserRegisterSchema = Joi.object({
 });
 exports.UserRegisterSchema = UserRegisterSchema;
 
-const UserLoginSchema = Joi.object({
+const UserLoginSchema = Joi.object({  
   emailOrMobile: Joi.alternatives([
     Joi.string().email(),
     Joi.string().pattern(/^[0-9]{10}$/),

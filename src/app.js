@@ -4,6 +4,7 @@ const morgan = require("morgan");
 const cors = require("cors");
 const authRoute = require("./route/auth-router");
 const vendorRoute = require('./route/vendor-route')
+const adminRoute = require('./route/admin-route')
 const notFoundMiddleware = require("./middlewares/not-founded");
 const errorMiddleware = require("./middlewares/error");
 const PORT = process.env.PORT || "5000";
@@ -17,7 +18,7 @@ app.use(morgan("dev"));
 
 app.use("/auth", authRoute);
 app.use("/vendor", vendorRoute);
-// app.use('/admin',adminRoute)
+app.use('/admin',adminRoute)
 
 app.use(notFoundMiddleware);
 app.use(errorMiddleware);
