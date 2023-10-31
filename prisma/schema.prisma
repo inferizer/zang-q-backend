@@ -40,7 +40,7 @@ model Shops {
   id                  Int           @id @default(autoincrement())
   registerationNumber String?
   registertionPic     String?
-  shoptName           String
+  shopName           String
   shopLat             Float
   shopLan             Float
   shopMobile          String
