@@ -28,6 +28,7 @@ app.use(
 app.use(passport.initialize());
 app.use(passport.session());
 
+
 app.use("/", authRoute);
 app.use("/vendor", vendorRoute);
 // app.use('/admin',adminRoute)
