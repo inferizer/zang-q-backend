@@ -5,9 +5,17 @@ const createError = require("../utils/create-error");
 
 exports.login = async (req, res, next) => {
   try {
-    const user = await prisma.users.findFirst({
+    const user = await prisma.users.upsert({
       where: {
         email: req.user.email,
+      },
+      update: {
+        googleId: req.user.id,
+      },
+      create: {
+        accessToken: req.user.body,
+        email: req.user.email,
+        googleId: req.user.id,
       },
     });
 
