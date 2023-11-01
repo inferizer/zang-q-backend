@@ -36,29 +36,10 @@ const check_role = async (req) => {
       where:{
         id:req.user.id
       }
-    })
-    
-  return user
-  }
-  
-  const user = await prisma.users.findFirst({
-    where:{
-      id: req.user.id
-    }
-  })
-  return user
-}
-exports.getAuthUser =  async (req,res,next) =>{
-
-  try{
-    const user =  await check_role(req) 
-    delete user.password
+    }) 
     if(!user) return next(createError("user not found",400))
     res.status(200).json({user})
-  }
-  catch (err) {
-    next(err)
-  }
+  } 
 }
 exports.register = async (req,res,next) => {
     try {
