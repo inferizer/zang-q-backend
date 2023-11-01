@@ -37,9 +37,6 @@ const check_role = async (req) => {
         id:req.user.id
       }
     })
-    
-  
-  
   return user
   }
   
@@ -57,7 +54,10 @@ exports.getAuthUser =  async (req,res,next) =>{
     delete user.password
     if(!user) return next(createError("user not found",400))
     res.status(200).json({user})
-  } 
+  } catch(err) {
+    next(err)
+  }
+  
 }
 exports.register = async (req,res,next) => {
     try {
