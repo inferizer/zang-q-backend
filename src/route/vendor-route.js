@@ -11,7 +11,7 @@ router.post(
   "/application",
   authenticate,
   upload_middleware.fields([
-    { name: "shopPic", maxCount: 1 },
+    { name: "shopPicture", maxCount: 1 },
     { name: "idCard", maxCount: 1 },
   ]),
   vendorController.application
