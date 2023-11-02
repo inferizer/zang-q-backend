@@ -22,4 +22,4 @@ app.use("/vendor", vendorRoute);
 app.use(notFoundMiddleware);
 app.use(errorMiddleware);
 
-app.listen(PORT, () => console.log(`server running on port: ${PORT}`));
+app.listen(PORT,"192.168.0.58", () => console.log(`server running on port: ${PORT}`));

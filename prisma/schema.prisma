@@ -33,6 +33,7 @@ model Resevations {
   branch      Branchs  @relation(fields: [branchId], references: [id])
   queueNumber Int
   status      Status
+  type        reservation
   createdAt   DateTime @default(now())
 }
 
@@ -40,12 +41,12 @@ model Shops {
   id                  Int           @id @default(autoincrement())
   registerationNumber String?
   registertionPic     String?
-  shopName           String
+  shopName            String
   shopLat             Float
   shopLan             Float
   shopMobile          String
   openingTimes        String
-  closeingTimes       String
+  closingTimes        String
   currentQueueNumber  Int?
   shopPicture         String
   ownerFirstName      String
@@ -62,11 +63,11 @@ model Shops {
 }
 
 model ShopAccount {
-  id       Int    @id @default(autoincrement())
-  email    String @unique
+  id       Int     @id @default(autoincrement())
+  email    String  @unique
   password String
-  role  String  @default("vendor")
-  Shops Shops[]
+  role     String  @default("vendor")
+  Shops    Shops[]
 }
 
 model Categories {
@@ -112,10 +113,15 @@ enum Status {
   cancelled
 }
 
-
-
 enum is_approve {
   pending
   approved
   rejected
+}
+
+enum reservation {
+  one
+  two
+  three
+  four
 }
