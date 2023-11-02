@@ -108,26 +108,27 @@ exports.login = async (req, res, next) => {
       };
 
 exports.loginLine = async (req, res, next) => {
-
-  const { userId } = req.body;
-  const data = {
-    name: userId
-  }
+  const { userId,displayName } = req.body;
+  console.log(req.body)
+  // const data = {
+  //   name: userId
+  // }
   
   try {
-
     const lineUser = await prisma.users.findFirst({
             where: {
-           lineId : userId
+           lineId : userId,
+           
       }
     })
     if (!lineUser) {
       const user = await prisma.users.create({
         data: {
           lineId : userId,
+          username : displayName
         }
       })
-      const payload ={
+      const payload = {
         lineId : user.lineId , role : user.role
       };
       const accessToken = jwt.sign(payload, process.env.JWT_SECRET_KEY || 'qwertyuiop', {
