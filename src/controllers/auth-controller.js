@@ -31,6 +31,7 @@ const user_login = async (value) => {
 const check_role = async (req) => {
   
   const VENDOR = "vendor"
+  console.log(req.body)
   if(req.user.role == VENDOR) {
     const user = await prisma.shopAccount.findUnique({
       where:{
@@ -39,7 +40,7 @@ const check_role = async (req) => {
     })
   return user
   }
-  
+
   const user = await prisma.users.findFirst({
     where:{
       id: req.user.id
@@ -48,7 +49,7 @@ const check_role = async (req) => {
   return user
 }
 exports.getAuthUser =  async (req,res,next) =>{
-
+  
   try{
     const user =  await check_role(req) 
     delete user.password
@@ -145,6 +146,7 @@ exports.loginLine = async (req, res, next) => {
       });
       console.log(payload)
       res.status(200).json({accessToken})
+      // res.redirect('http://localhost:5173/register')
     }
     console.log('Login Line')
   } catch (err) { 
@@ -152,12 +154,12 @@ exports.loginLine = async (req, res, next) => {
   }
 };
 
-exports.test = async (req,res,next) => {
-try {
-  const { } = res.body 
+// exports.test = async (req,res,next) => {
+// try {
+//   const { } = res.body 
   
-  res.status(200).json({msg: 'hi'})
-} catch (err) {
-  next(err)
-}
-}
+//   res.status(200).json({msg: 'hi'})
+// } catch (err) {
+//   next(err)
+// }
+// }
