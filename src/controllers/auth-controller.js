@@ -151,3 +151,12 @@ exports.loginLine = async (req, res, next) => {
   }
 };
 
+exports.test = async (req,res,next) => {
+try {
+  const { } = res.body 
+  
+  res.status(200).json({msg: 'hi'})
+} catch (err) {
+  next(err)
+}
+}
