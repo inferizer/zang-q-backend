@@ -8,33 +8,35 @@ datasource db {
 }
 
 model Users {
-  id          Int           @id @default(autoincrement())
-  username    String?       @unique
-  email       String?       @unique
-  mobile      String?       @unique
-  facebookId  String?
-  googleId    String?
-  lineId      String?
-  password    String?
-  location    String?
-  isActive    Boolean       @default(true)
-  banCount    Int           @default(0)
-  role        Role          @default(user)
-  Resevations Resevations[]
+  id           Int           @id @default(autoincrement())
+  username     String?       @unique
+  name         String?        
+  email        String?       @unique
+  mobile       String?       @unique
+  facebookId   String?
+  googleId     String?
+  lineId       String?
+  password     String?
+  location     String?
+  profileImage String?
+  isActive     Boolean       @default(true)
+  banCount     Int           @default(0)
+  role         Role          @default(user)
+  Resevations  Resevations[]
 }
 
 model Resevations {
-  id          Int      @id @default(autoincrement())
+  id          Int         @id @default(autoincrement())
   userId      Int
-  user        Users    @relation(fields: [userId], references: [id])
+  user        Users       @relation(fields: [userId], references: [id])
   shopId      Int
-  shop        Shops    @relation(fields: [shopId], references: [id])
+  shop        Shops       @relation(fields: [shopId], references: [id])
   branchId    Int
-  branch      Branchs  @relation(fields: [branchId], references: [id])
+  branch      Branchs     @relation(fields: [branchId], references: [id])
   queueNumber Int
   status      Status
   type        reservation
-  createdAt   DateTime @default(now())
+  createdAt   DateTime    @default(now())
 }
 
 model Shops {
