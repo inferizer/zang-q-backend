@@ -111,8 +111,8 @@ exports.application = async (req,res,next) => {
     console.log(err)
   }
   finally{
-    if(req.files.shopPic){
-      fs.unlink(req.files.shopPic[0].path)
+    if(req.files.shopPicture){
+      fs.unlink(req.files.shopPicture[0].path)
 
     }
     if(req.files.idCard){
