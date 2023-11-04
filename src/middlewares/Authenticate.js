@@ -8,8 +8,6 @@ const USER = "user"
 module.exports = async (req, res, next) => {
 
   try {
-
-    
     const authorization = req.headers.authorization;
     if (!authorization || !authorization.startsWith('Bearer ')) {
       return next(createError('unauthenticated', 401));

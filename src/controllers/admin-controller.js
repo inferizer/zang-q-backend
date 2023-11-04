@@ -1,21 +1,27 @@
-exports.approved = async (req, res, next) => {
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
+const { adminRegisterSchema, adminLoginSchema } = require('../validator/admin-validator');
+const prisma = require('../models/prisma');
+
+exports.register = async (req, res, next) => {
   try {
-    const { id } = req.body
-    const approveShop = await prisma.shops.findMany({
-      select: {
-        id: true,
-        isApprove: true,
-     }
+    const { value, error } = adminRegisterSchema.validate(req.body);
+    if (error) {
+      return next(error)
+
+    } console.log(value)
+    value.password = await bcrypt.hash(value.password, 10);
+
+    const user = await prisma.users.create({
+      data: { ...value, role: "admin" }
     })
-    await prisma.shops.update({
-      where : {
-        shops : id},
-      data : {
-        isApprove: "approved"
-      }
-    })
-    console.log(shops)
-    res.status(200).json({ approveShop })
+
+    const payload = { userId: user.id, };
+    const accessToken = jwt.sign(payload, process.env.JWT_SECRET_KEY || 'qwertyuiop', {
+      expiresIn: process.env.JWT_EXPIRE
+    });
+    delete user.password;
+    res.status(200).json({ accessToken, msg: 'ADMIN!!!!' });
   } catch (err) {
     next(err)
   }
@@ -96,3 +102,28 @@ exports.find_All_Shop = async (req, res, next) => {
     next(err)
   }
 }
+exports.approved = async (req, res, next) => {
+  try {
+    const { id } = req.body
+    const approveShop = await prisma.shops.findMany({
+      select: {
+        id: true,
+        isApprove: true,
+     }
+    })
+    await prisma.shops.update({
+      where : {
+        shops : id},
+      data : {
+        isApprove: "approved"
+      }
+    })
+    console.log(shops)
+    res.status(200).json({ approveShop })
+  } catch (err) {
+    next(err)
+  }
+}
+
+// exports.reject  //delete
+// exports.approve //update
