@@ -24,8 +24,8 @@ ALTER TABLE `location` DROP COLUMN `branchId`;
 -- AlterTable
 ALTER TABLE `resevations` DROP COLUMN `branchId`,
     DROP COLUMN `createdAt`,
-    ADD COLUMN `bookingDate` DATE NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
-    ADD COLUMN `bookingTime` TIME NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    ADD COLUMN `bookingDate` DATE NOT NULL,
+    ADD COLUMN `bookingTime` TIME NOT NULL ,
     MODIFY `status` ENUM('pending', 'accepted', 'cancelled') NOT NULL;
 
 -- AlterTable

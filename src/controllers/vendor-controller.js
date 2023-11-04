@@ -10,8 +10,8 @@ const createError = require('../utils/create-error');
 const hdl_application_body =  (body) => {
     const data = {}
   if(body.shopName) data.shopName = body.shopName
-  if(body.shopLat) data.shopLat = body.shopLat
-  if(body.shopLan) data.shopLan = body.shopLan
+  if(body.shopLat) data.shopLat = +body.shopLat
+  if(body.shopLan) data.shopLan = +body.shopLan
   if(body.shopMobile) data.shopMobile = body.shopMobile
   if(body.openingTimes) data.openingTimes = body.openingTimes
   if(body.closingTimes) data.closingTimes = body.closingTimes
@@ -74,29 +74,38 @@ exports.login = async (req, res, next) => {
 
 exports.application = async (req,res,next) => {
   try{
+    const {role} =  req.user
     
-    if(!req.user.role == "vendor") return next(createError("only vendor permitted",400))
+    if(!(role === "vendor")) return next(createError("only vendor permitted",400))
     if(!req.files) return next(createError("all image required",400))
-    const data = {}
+    const existApplication = await prisma.shops.findFirst({
+  where:{
+    isApprove:"pending",
+    shopAccountId: req.user.id
+  }})
+  if(existApplication) return next(createError("only one application allow per vendor"))
+    let data = {}
   data.shopAccountId = req.user.id
-    const result = hdl_application_body(req.body)
-    
-    if(req.files.shopPic){
-      const result = await cloudinary(req.files.shopPic[0].path)
-      data.shopPic = result
+    let req_input = hdl_application_body(req.body)
+      data =  {...data,...req_input}
+
+    if(req.files.shopPicture){
+      const result = await cloudinary(req.files.shopPicture[0].path)
+      data.shopPicture = result
     }
 
     if(req.files.idCard){
       const result = await cloudinary(req.files.idCard[0].path)
       data.idCard = result
     }
-    console.log(data)
+    console.log("this is data",data)
     const application = await prisma.shops.create({
       data:data
+      
     })
 
 
-    res.status(200).json({msg:"apllication registered",application})
+    res.status(200).json({msg:"aplication registered"})
 
   }catch(err){
     console.log(err)
@@ -104,11 +113,10 @@ exports.application = async (req,res,next) => {
   finally{
     if(req.files.shopPic){
       fs.unlink(req.files.shopPic[0].path)
-      
+
     }
     if(req.files.idCard){
       fs.unlink(req.files.idCard[0].path)
-  
     }
 
 
