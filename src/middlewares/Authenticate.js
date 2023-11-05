@@ -15,9 +15,7 @@ module.exports = async (req, res, next) => {
 
     const token = authorization.split(' ')[1];
     const payload = jwt.verify(token, process.env.JWT_SECRET_KEY || 'qwertyuiop');
-
     if(payload.role == VENDOR){
-      
       const user =  await prisma.shopAccount.findUnique({
         where:{
           id: payload.userId
@@ -31,7 +29,6 @@ module.exports = async (req, res, next) => {
       return next()
       
     }
-  
       const user = await prisma.users.findUnique({
         where: {
           id: payload.userId

@@ -29,9 +29,16 @@ const user_login = async (value) => {
 }
 
 const check_role = async (req) => {
-  
+  // if(req.body == )
+  if(req.body.hasOwnProperty('lineId'))  {
+    const user = await prisma.users.findUnique({
+      where:{
+        lineId: req.body.lineId
+      }
+    })
+  return user
+  }
   const VENDOR = "vendor"
-  console.log(req.body)
   if(req.user.role == VENDOR) {
     const user = await prisma.shopAccount.findUnique({
       where:{
@@ -48,9 +55,10 @@ const check_role = async (req) => {
   })
   return user
 }
+
 exports.getAuthUser =  async (req,res,next) =>{
-  
   try{
+    
     const user =  await check_role(req) 
     delete user.password
     if(!user) return next(createError("user not found",400))
@@ -100,7 +108,6 @@ exports.login = async (req, res, next) => {
           const accessToken = jwt.sign(payload, process.env.JWT_SECRET_KEY || 'qwertyuiop', {
             expiresIn: process.env.JWT_EXPIRE
           });
-      
           delete user.password;
           res.status(200).json({ accessToken,user });
         } catch (err) {
@@ -110,19 +117,28 @@ exports.login = async (req, res, next) => {
 
 exports.loginLine = async (req, res, next) => {
   const { userId,displayName } = req.body;
-  console.log(req.body)
-  // const data = {
-  //   name: userId
-  // }
   
   try {
-    const lineUser = await prisma.users.findFirst({
+
+    const existLineUser = await prisma.users.findFirst({
             where: {
            lineId : userId,
            
       }
     })
-    if (!lineUser) {
+    if (existLineUser) {
+      
+      const payload = {
+        userId : existLineUser.id , role : existLineUser.role
+      };
+      const accessToken = jwt.sign(payload, process.env.JWT_SECRET_KEY || 'qwertyuiop', {
+        expiresIn: process.env.JWT_EXPIRE
+      });
+      let user = existLineUser
+      console.log(user)
+      return res.status(200).json({accessToken,user})
+    } 
+
       const user = await prisma.users.create({
         data: {
           lineId : userId,
@@ -130,25 +146,15 @@ exports.loginLine = async (req, res, next) => {
         }
       })
       const payload = {
-        lineId : user.lineId , role : user.role
+        userId : user.id , role : user.role
       };
       const accessToken = jwt.sign(payload, process.env.JWT_SECRET_KEY || 'qwertyuiop', {
         expiresIn: process.env.JWT_EXPIRE
       });
-      console.log(payload)
-      res.status(200).json({accessToken})
-    } else {
-      const payload = {
-        lineId : lineUser.lineId , role : lineUser.role
-      };
-      const accessToken = jwt.sign(payload, process.env.JWT_SECRET_KEY || 'qwertyuiop', {
-        expiresIn: process.env.JWT_EXPIRE
-      });
-      console.log(payload)
-      res.status(200).json({accessToken})
+    
+      res.status(200).json({accessToken,user})
       // res.redirect('http://localhost:5173/register')
-    }
-    console.log('Login Line')
+    
   } catch (err) { 
     next(err);
   }

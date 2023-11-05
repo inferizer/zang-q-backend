@@ -104,26 +104,35 @@ exports.find_All_Shop = async (req, res, next) => {
 }
 exports.approved = async (req, res, next) => {
   try {
-    const { id } = req.body
-    const approveShop = await prisma.shops.findMany({
-      select: {
-        id: true,
-        isApprove: true,
-     }
-    })
-    await prisma.shops.update({
-      where : {
-        shops : id},
-      data : {
+    const { id } = req.body;
+    const approvedShop = await prisma.shops.update({
+      where: {
+        id: id,
+        isApprove: "pending"
+      },
+      data: {
         isApprove: "approved"
       }
-    })
-    console.log(shops)
-    res.status(200).json({ approveShop })
+    });
+
+    console.log(approvedShop);
+    res.status(200).json({ approvedShop });
   } catch (err) {
+    next(err);
+  } 
+};
+
+exports.reject = async (req, res, next) => {
+  const { shopsId } = req.params
+  try {
+    const rejectShop = await prisma.shops.delete({
+      where: {
+        id: +shopsId
+      }
+    })
+    res.status(201).json({ rejectShop })
+  } catch (err) {
+    console.log(err)
     next(err)
   }
 }
-
-// exports.reject  //delete
-// exports.approve //update
