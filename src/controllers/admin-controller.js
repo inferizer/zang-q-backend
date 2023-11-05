@@ -1,5 +1,5 @@
 const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
+const createToken = require("../utils/jwt")
 const { adminRegisterSchema, adminLoginSchema } = require('../validator/admin-validator');
 const prisma = require('../models/prisma');
 
@@ -17,11 +17,9 @@ exports.register = async (req, res, next) => {
     })
 
     const payload = { userId: user.id, };
-    const accessToken = jwt.sign(payload, process.env.JWT_SECRET_KEY || 'qwertyuiop', {
-      expiresIn: process.env.JWT_EXPIRE
-    });
+    const accessToken =  createToken(payload)
     delete user.password;
-    res.status(200).json({ accessToken, msg: 'ADMIN!!!!' });
+    res.status(200).json({ accessToken, message: 'admin registered' });
   } catch (err) {
     next(err)
   }
@@ -35,21 +33,19 @@ exports.login = async (req, res, next) => {
     }
     const user = await prisma.users.findFirst({
       where: {
-        username: user.username
+        username: value.username
       }
     })
     if (!user) {
       return next(createError('invalid Login', 400));
     }
-    console.log(user)
+    
     const compareMatch = await bcrypt.compare(value.password, user.password)
     if (!compareMatch) {
       return next(createError('invalid Login', 400));
     }
     const payload = { userId: user.id };
-    const accessToken = jwt.sign(payload, process.env.JWT_SECRET_KEY || 'qwertyuiop', {
-      expiresIn: process.env.JWT_EXPIRE
-    });
+    const accessToken = createToken(payload)
 
     delete user.password;
     res.status(200).json({ accessToken, msg: "Welcome Admin!!!" });
