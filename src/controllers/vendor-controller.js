@@ -3,9 +3,9 @@ const prisma = require('../models/prisma')
 const createToken = require('../utils/jwt')
 const { cloudinary } = require('../utils/cloudinary')
 const fs = require('fs/promises')
-
 const { vendorRegisterSchema, vendorLoginSchema } = require('../validator/vendor-validator');
 const createError = require('../utils/create-error');
+const VENDOR = "vendor"
 
 const hdl_application_body = (body) => {
   const data = {}
@@ -80,7 +80,7 @@ exports.application = async (req, res, next) => {
   try {
     const { role } = req.user
 
-    if (!(role === "vendor")) return next(createError("only vendor permitted", 400))
+    if (role != VENDOR) return next(createError("only vendor permitted", 400))
     if (!req.files) return next(createError("all image required", 400))
     const existApplication = await prisma.shops.findFirst({
       where: {

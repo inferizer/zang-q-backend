@@ -3,10 +3,10 @@ const router = express.Router();
 const adminController = require("../controllers/admin-controller");
 const Authenticate = require("../middlewares/Authenticate");
 
-router.post("/register", adminController.register);
-router.post("/login", adminController.login);
-router.get('/q',Authenticate, adminController.getAdmin)
-router.get('/find_all_shop',adminController.find_All_Shop)
-router.post('/approved_shop',adminController.approved)
+router.post("/register",Authenticate, adminController.register);
+router.post("/login", Authenticate, adminController.login);
+router.get('/find_all_shop', Authenticate, adminController.find_All_Shop)
+router.post('/approved',Authenticate,adminController.approvedApplication)
+router.get('/pending',Authenticate,adminController.getAllPendingShopApplication)
 
 module.exports = router;
