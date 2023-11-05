@@ -1,6 +1,6 @@
 
 const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
+const createToken  = require('../utils/jwt')
 const createError = require('../utils/create-error');
 const { UserRegisterSchema, UserLoginSchema,GoogleLoginSchema } = require('../validator/auth-validator');
 const prisma = require('../models/prisma')
@@ -31,7 +31,7 @@ const user_login = async (value) =>{
 const check_role = async (req) => {
   
   const VENDOR = "vendor"
-  console.log(req.body)
+
   if(req.user.role == VENDOR) {
     const user = await prisma.shopAccount.findUnique({
       where:{
@@ -72,9 +72,7 @@ exports.register = async (req,res,next) => {
         });
         
         const payload = { userId: user.id,role:user.role };
-        const accessToken = jwt.sign(payload, process.env.JWT_SECRET_KEY || 'qwertyuiop', {
-          expiresIn: process.env.JWT_EXPIRE
-        });
+        const accessToken = createToken(payload)
         delete user.password
         res.status(201).json({ accessToken, user });
       } catch (err) {
@@ -97,9 +95,7 @@ exports.login = async (req, res, next) => {
             return next(createError('invalid Login', 400));
           }
           const payload = { userId: user.id, role: user.role };
-          const accessToken = jwt.sign(payload, process.env.JWT_SECRET_KEY || 'qwertyuiop', {
-            expiresIn: process.env.JWT_EXPIRE
-          });
+          const accessToken = createToken(payload)
       
           delete user.password;
           res.status(200).json({ accessToken,user });
@@ -112,7 +108,7 @@ exports.login = async (req, res, next) => {
 
 exports.googleLogin =  async (req,res,next) =>{
   try{
-    console.log(req.body)
+    
     const {value,error} = GoogleLoginSchema.validate(req.body)
     if(error) return next(error)
     const existGoogleLogin = await prisma.users.findFirst({
@@ -121,8 +117,7 @@ exports.googleLogin =  async (req,res,next) =>{
   }})
   if(existGoogleLogin){
       const payload = { userId: existGoogleLogin.id, role: existGoogleLogin.role}
-      const accessToken = jwt.sign(payload, process.env.JWT_SECRET_KEY || "qwertyuiop",{expiresIn: process.env.JWT_EXPIRE})
-    delete existGoogleLogin.password
+      const accessToken = createToken(payload)
     let user = existGoogleLogin
       return res.status(200).json({accessToken,user})
     } 
@@ -130,7 +125,7 @@ exports.googleLogin =  async (req,res,next) =>{
       data:value
     })
     const payload = { userId: user.id, role: user.role}
-    const accessToken = jwt.sign(payload, process.env.JWT_SECRET_KEY || "qwertyuiop",{expiresIn: process.env.JWT_EXPIRE})
+    const accessToken = createToken(payload)
     delete user.password
     res.status(200).json({accessToken,user})
 
@@ -167,20 +162,18 @@ exports.loginLine = async (req, res, next) => {
       const accessToken = jwt.sign(payload, process.env.JWT_SECRET_KEY || 'qwertyuiop', {
         expiresIn: process.env.JWT_EXPIRE
       });
-      console.log(payload)
+      
       res.status(200).json({accessToken})
     } else {
       const payload = {
         lineId : lineUser.lineId , role : lineUser.role
       };
-      const accessToken = jwt.sign(payload, process.env.JWT_SECRET_KEY || 'qwertyuiop', {
-        expiresIn: process.env.JWT_EXPIRE
-      });
+      const accessToken = createToken(payload)
       console.log(payload)
       res.status(200).json({accessToken})
       // res.redirect('http://localhost:5173/register')
     }
-    console.log('Login Line')
+    
   } catch (err) { 
     next(err);
   }
