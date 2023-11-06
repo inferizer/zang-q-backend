@@ -123,14 +123,14 @@ exports.approved = async (req, res, next) => {
 };
 
 exports.reject = async (req, res, next) => {
-  const { shopsId } = req.params
+  const { id } = req.params;
   try {
     const rejectShop = await prisma.shops.delete({
       where: {
-        id: +shopsId
+        id: +id
       }
     })
-    res.status(201).json({ rejectShop })
+    res.status(201).json({msg:'reject', rejectShop })
   } catch (err) {
     console.log(err)
     next(err)

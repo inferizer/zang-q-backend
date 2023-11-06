@@ -8,7 +8,7 @@ router.post("/login", adminController.login);
 router.get('/q',Authenticate, adminController.getAdmin)
 router.get('/find_all_shop',adminController.find_All_Shop)
 router.post('/approved',adminController.approved)
-router.delete('/reject/:shopId',adminController.reject)
+router.delete('/reject/:id',adminController.reject)
 
 module.exports = router;
     
