@@ -8,44 +8,47 @@ datasource db {
 }
 
 model Users {
-  id          Int           @id @default(autoincrement())
-  username    String?       @unique
-  email       String?       @unique
-  mobile      String?       @unique
-  facebookId  String?
-  googleId    String?
-  lineId      String?
-  password    String?
-  location    String?
-  isActive    Boolean       @default(true)
-  banCount    Int           @default(0)
-  role        Role          @default(user)
-  Resevations Resevations[]
+  id           Int           @id @default(autoincrement())
+  username     String?       @unique
+  name         String?        
+  email        String?       @unique
+  mobile       String?       @unique
+  facebookId   String?
+  googleId     String?
+  lineId       String?
+  password     String?
+  location     String?
+  profileImage String?
+  isActive     Boolean       @default(true)
+  banCount     Int           @default(0)
+  role         Role          @default(user)
+  Resevations  Resevations[]
 }
 
 model Resevations {
-  id          Int      @id @default(autoincrement())
+  id          Int         @id @default(autoincrement())
   userId      Int
-  user        Users    @relation(fields: [userId], references: [id])
+  user        Users       @relation(fields: [userId], references: [id])
   shopId      Int
-  shop        Shops    @relation(fields: [shopId], references: [id])
+  shop        Shops       @relation(fields: [shopId], references: [id])
   branchId    Int
-  branch      Branchs  @relation(fields: [branchId], references: [id])
+  branch      Branchs     @relation(fields: [branchId], references: [id])
   queueNumber Int
   status      Status
-  createdAt   DateTime @default(now())
+  type        reservation
+  createdAt   DateTime    @default(now())
 }
 
 model Shops {
   id                  Int           @id @default(autoincrement())
   registerationNumber String?
   registertionPic     String?
-  shopName           String
+  shopName            String
   shopLat             Float
   shopLan             Float
   shopMobile          String
   openingTimes        String
-  closeingTimes       String
+  closingTimes        String
   currentQueueNumber  Int?
   shopPicture         String
   ownerFirstName      String
@@ -62,11 +65,11 @@ model Shops {
 }
 
 model ShopAccount {
-  id       Int    @id @default(autoincrement())
-  email    String @unique
+  id       Int     @id @default(autoincrement())
+  email    String  @unique
   password String
-  role  String  @default("vendor")
-  Shops Shops[]
+  role     String  @default("vendor")
+  Shops    Shops[]
 }
 
 model Categories {
@@ -112,10 +115,15 @@ enum Status {
   cancelled
 }
 
-
-
 enum is_approve {
   pending
   approved
   rejected
+}
+
+enum reservation {
+  one
+  two
+  three
+  four
 }

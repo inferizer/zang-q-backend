@@ -47,4 +47,14 @@ const UserLoginSchema = Joi.object({
 });
 
 exports.UserLoginSchema = UserLoginSchema;
+
+
+const GoogleLoginSchema = Joi.object({
+  username:Joi.string().required(),
+  email: Joi.string().email().required(),
+  googleId: Joi.string().required(),
+  profileImage: Joi.string().required()
+})
+
+exports.GoogleLoginSchema = GoogleLoginSchema
 // userSchema , adminShcema ,venderSchem
