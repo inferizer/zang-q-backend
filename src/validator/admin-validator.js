@@ -23,3 +23,10 @@ const adminLoginSchema = Joi.object({
 });
 
 exports.adminLoginSchema = adminLoginSchema;
+
+
+const categorySchema = Joi.object({
+  name: Joi.string().required()
+})
+
+exports.categorySchema = categorySchema
