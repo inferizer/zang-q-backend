@@ -8,7 +8,12 @@ const testRoute = require("./route/test");
 const adminRoute = require("./route/admin-route");
 const notFoundMiddleware = require("./middlewares/not-founded");
 const errorMiddleware = require("./middlewares/error");
+const dayjs = require("dayjs");
+const utc = require("dayjs/plugin/utc");
+dayjs.extend(utc);
+const mobileFormat = require("./utils/mobileFormat");
 const PORT = process.env.PORT || "5000";
+const FRONT_URL = process.env.FRONT_URL || "http://localhost:5173";
 const http = require("http");
 const { Server } = require("socket.io");
 
@@ -16,8 +21,8 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: "http://localhost:5173",
-    methods: ["GET", "POST", "PATCH", "DELETE"],
+    origin: FRONT_URL,
+    methods: ["GET", "POST"],
   },
 });
 
@@ -32,25 +37,25 @@ io.on("connect", (socket) => {
     socket.join(roomInfo);
   });
 
-  socket.on("join room", (roomInfo) => {
+  socket.on("join_room", (roomInfo) => {
     socket.join(roomInfo);
-    console.log(`>User<: ${socket.id} Joined room: ${roomInfo}`);
   });
 
-  socket.on("booking", (data) => {
-    console.log(data);
-    io.to(`${data.userId}`).to(`${data.shopName}`).emit(
-      "ticket",
-      // (mocking) DB_reservation
-      {
-        data: "Online Queue Detail",
-        id: data.userId,
-        name: data.name,
-        qNumber: 2,
-        //   date: dayjs().format("DD MMMM YYYY"),
-        //   time: dayjs().format("h:mm A"),
-      }
-    );
+  socket.on("booking", (bookingInfo) => {
+    io.to(`${bookingInfo.userId}`)
+      .to(`${bookingInfo.shopName}`)
+      .emit(
+        "ticket",
+        // (mocking) DB_reservation
+        {
+          data: "Online Queue Detail",
+          id: bookingInfo.userId,
+          name: bookingInfo.name,
+          qNumber: 2,
+          date: dayjs().format("DD MMMM YYYY"),
+          time: dayjs().format("h:mm A"),
+        }
+      );
   });
 
   socket.on("booking for customer", (onstieData) => {
@@ -61,10 +66,10 @@ io.on("connect", (socket) => {
         data: "Onsite Queue",
         id: onstieData.userId,
         name: onstieData.name,
-        // mobile: mobileFormat(onstieData.mobile),
+        mobile: mobileFormat(onstieData.mobile),
         qNumber: 3,
-        // date: dayjs().format("DD MMMM YYYY"),
-        // time: dayjs().format("h:mm A"),
+        date: dayjs().format("DD MMMM YYYY"),
+        time: dayjs().format("h:mm A"),
       }
     );
   });
