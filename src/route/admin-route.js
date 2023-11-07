@@ -3,10 +3,15 @@ const router = express.Router();
 const adminController = require("../controllers/admin-controller");
 const Authenticate = require("../middlewares/Authenticate");
 
-router.post("/register", adminController.register);
-router.post("/login", adminController.login);
-router.get('/q',Authenticate, adminController.getAdmin)
-router.get('/find_all_shop',adminController.find_All_Shop)
-router.post('/approved_shop',adminController.approved)
+router.post("/register",Authenticate, adminController.register);
+router.post("/login", Authenticate, adminController.login);
+router.get('/find_all_shop', Authenticate, adminController.find_All_Shop)
+router.post('/pending',Authenticate,adminController.approvedApplication)
+router.delete('/pending/:id',Authenticate,adminController.rejectApplication)
+router.get('/pending',Authenticate,adminController.getAllPendingShopApplication)
+router.get("/category",Authenticate,adminController.getAllCategory)
+router.post("/category",Authenticate,adminController.createCategory)
+router.patch("/category",Authenticate,adminController.updateCategory)
+router.delete("/category/:id",Authenticate,adminController.deleteCategory)
 
 module.exports = router;

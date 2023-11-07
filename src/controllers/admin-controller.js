@@ -1,29 +1,33 @@
-const bcrypt = require('bcryptjs');
-const createToken = require("../utils/jwt")
-const { adminRegisterSchema, adminLoginSchema } = require('../validator/admin-validator');
-const prisma = require('../models/prisma');
+const bcrypt = require("bcryptjs");
+const createToken = require("../utils/jwt");
+const {
+  adminRegisterSchema,
+  adminLoginSchema,
+  categorySchema,
+} = require("../validator/admin-validator");
+const prisma = require("../models/prisma");
+const createError = require("../utils/create-error");
+const { exist } = require("joi");
+const PENDING = "pending";
+const APPROVED = "approved";
+const ADMIN = "admin";
 
 exports.register = async (req, res, next) => {
   try {
     const { value, error } = adminRegisterSchema.validate(req.body);
-    if (error) {
-      return next(error)
-
-    } console.log(value)
+    if (error) return next(error);
     value.password = await bcrypt.hash(value.password, 10);
-
     const user = await prisma.users.create({
-      data: { ...value, role: "admin" }
-    })
-
-    const payload = { userId: user.id, };
-    const accessToken =  createToken(payload)
+      data: { ...value, role: "admin" },
+    });
+    const payload = { userId: user.id };
+    const accessToken = createToken(payload);
     delete user.password;
-    res.status(200).json({ accessToken, message: 'admin registered' });
+    res.status(200).json({ accessToken, message: "admin registered" });
   } catch (err) {
-    next(err)
+    next(err);
   }
-}
+};
 
 exports.login = async (req, res, next) => {
   try {
@@ -33,20 +37,17 @@ exports.login = async (req, res, next) => {
     }
     const user = await prisma.users.findFirst({
       where: {
-        username: value.username
-      }
-    })
+        username: value.username,
+      },
+    });
     if (!user) {
-      return next(createError('invalid Login', 400));
+      return next(createError("invalid Login", 400));
     }
-    
-    const compareMatch = await bcrypt.compare(value.password, user.password)
-    if (!compareMatch) {
-      return next(createError('invalid Login', 400));
-    }
-    const payload = { userId: user.id };
-    const accessToken = createToken(payload)
 
+    const compareMatch = bcrypt.compare(value.password, user.password);
+    if (!compareMatch) return next(createError("invalid Login", 400));
+    const payload = { userId: user.id };
+    const accessToken = createToken(payload);
     delete user.password;
     res.status(200).json({ accessToken, msg: "Welcome Admin!!!" });
   } catch (err) {
@@ -54,72 +55,192 @@ exports.login = async (req, res, next) => {
   }
 };
 
-exports.getAdmin = async (req, res, next) => {
-  try {
-    const user = await prisma.users.findFirst({
-      where: {
-        id: req.user.id
-      }
-    })
-    res.status(200).json({ user })
-  } catch (err) {
-    next(err)
-  }
-};
-
-// find 
+// find
 
 exports.find_All_Shop = async (req, res, next) => {
   try {
-    const shopData = await prisma.shops.findMany({
-      select: {
-        id: true,
-        registerationNumber: true,
-        shopName: true,
-        shopLat: true,
-        shopLan: true,
-        shopMobile: true,
-        openingTimes: true,
-        closeingTimes: true,
-        currentQueueNumber: true,
-        shopPicture: true,
-        ownerFirstName: true,
-        ownerLastName: true,
-        idNumber: true,
-        idCard: true,
-        isOpen: true,
-        isApprove: true,
-        shopAccount: true,
-        shopAccountId: true
-      }
-    })
-    res.status(200).json({ shopData })
+    const result = await prisma.shops.findMany();
+    res.status(200).json({ result });
   } catch (err) {
-    next(err)
+    next(err);
   }
-}
-exports.approved = async (req, res, next) => {
+};
+
+exports.rejectApplication = async (req, res, next) => {
   try {
-    const { id } = req.body
-    const approveShop = await prisma.shops.findMany({
-      select: {
-        id: true,
-        isApprove: true,
-     }
-    })
-    await prisma.shops.update({
-      where : {
-        shops : id},
-      data : {
-        isApprove: "approved"
-      }
-    })
-    console.log(shops)
-    res.status(200).json({ approveShop })
+    const { role } = req.user;
+    const { id } = req.params;
+    if (role != ADMIN)
+      return next(
+        createError("only admin is permitted to perform this action", 400)
+      );
+    const existApplication = await prisma.shops.findFirst({
+      where: { id: +id },
+    });
+    if (!existApplication)
+      return next(
+        createError("no application submitted from this vendor", 400)
+      );
+
+    await prisma.shops.delete({
+      where: {
+        id: +id,
+      },
+    });
+
+    const result = await prisma.shops.findMany({
+      where: {
+        isApprove: PENDING,
+      },
+    });
+
+    res.status(200).json({ result });
   } catch (err) {
-    next(err)
+    next(err);
   }
+};
+
+exports.approvedApplication = async (req, res, next) => {
+  try {
+    console.log("approve body", req.body);
+    const { role } = req.user;
+    const { id } = req.body;
+    if (role != ADMIN)
+      return next(
+        createError("only admin is permitted to perform this action", 400)
+      );
+    const existApplication = await prisma.shops.findFirst({
+      where: { id: +id },
+    });
+    if (!existApplication)
+      return next(
+        createError("no application submitted from this vendor", 400)
+      );
+    await prisma.shops.update({
+      where: { id: existApplication.id },
+      data: {
+        isApprove: "approved",
+      },
+    });
+
+    const result = await prisma.shops.findMany({
+      where: {
+        isApprove: PENDING,
+      },
+    });
+
+    res.status(200).json({ result });
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.getAllPendingShopApplication = async (req, res, next) => {
+  const { role } = req.user;
+  if (role != ADMIN)
+    return next(createError)(
+      "Only admin is allowed to perform this action",
+      400
+    );
+  const result = await prisma.shops.findMany({
+    where: {
+      isApprove: PENDING,
+    },
+  });
+
+  res.status(200).json({ result });
+};
+
+exports.getAllCategory =  async( req,res,next) =>{
+  const { role } = req.user;
+  if (role != ADMIN)
+    return next(
+      createError("Only admin is allowed to perform this action", 400)
+    );
+    const result = await prisma.type.findMany()
+    res.status(200).json({result})
+
 }
 
-// exports.reject  //delete
-// exports.approve //update
+exports.createCategory = async (req, res, next) => {
+  const { role } = req.user;
+  if (role != ADMIN)
+    return next(
+      createError("Only admin is allowed to perform this action", 400)
+    );
+  const { value, error } = categorySchema.validate(req.body);
+  if (error) return next(error);
+  const existCategory = await prisma.type.findMany();
+  for (let i of existCategory) {
+    if (value.name.toUpperCase() == i.name.toUpperCase())
+      return next(createError("category already exist", 400));
+  }
+   await prisma.type.create({
+    data: value,
+  });
+
+  const result = await prisma.type.findMany()
+  res.status(200).json({ result });
+};
+exports.updateCategory = async (req,res,next) => {
+  try{
+
+    const { role } = req.user;
+    const {id,name} = req.body
+    if (role != ADMIN)
+    return next(createError ("Only admin is allowed to perform this action",400))
+  
+  const selectedCategory = await prisma.type.findUnique({
+    where:{
+      id:id
+    }
+  })
+  if(!selectedCategory) return next(createError("please provide valid category",400))
+  await prisma.type.update({
+where:{
+  id:selectedCategory.id
+},
+data:{
+  name:name
+}
+})
+const result = await prisma.type.findMany()
+res.status(200).json({result})
+
+
+}
+catch(err){
+  console.log(err)
+}
+};
+exports.deleteCategory = async (req,res,next) => {
+  try{
+
+    const { role } = req.user;
+    const {id} = req.params 
+    if (role != ADMIN)
+    return next(createError(
+  "Only admin is allowed to perform this action",
+  400
+  ))
+  
+  const selectedCategory = await prisma.type.findFirst({
+    where:{
+      id:+id
+    }
+  })
+  if(!selectedCategory) return next(createError("please provide valid category",400))
+  await prisma.type.delete({
+where:{
+  id: selectedCategory.id
+}})
+
+const result  = await prisma.type.findMany()
+
+res.status(200).json({result})
+}
+catch(err){
+  console.log(err)
+}
+
+};
