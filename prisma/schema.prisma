@@ -33,8 +33,8 @@ model Resevations {
   shop        Shops       @relation(fields: [shopId], references: [id])
   branchId    Int
   branch      Branchs     @relation(fields: [branchId], references: [id])
-  queueNumber Int
-  status      Status
+  queueNumber Int         
+  status      Status      @default(pending)
   type        reservation
   createdAt   DateTime    @default(now())
 }
