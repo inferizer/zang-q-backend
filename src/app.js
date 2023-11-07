@@ -33,7 +33,7 @@ app.use(morgan("dev"));
 // socket.io >>>>>>>>>>>>>>>>>>
 io.on("connect", (socket) => {
   console.log(`>User<: ${socket.id} connected`);
-  socket.on("create-room", (roomInfo) => {
+  socket.on("create_room", (roomInfo) => {
     socket.join(roomInfo);
   });
 
@@ -42,32 +42,50 @@ io.on("connect", (socket) => {
   });
 
   socket.on("booking", (bookingInfo) => {
-    io.to(`${bookingInfo.userId}`)
-      .to(`${bookingInfo.shopName}`)
-      .emit(
-        "ticket",
-        // (mocking) DB_reservation
-        {
-          data: "Online Queue Detail",
-          id: bookingInfo.userId,
-          name: bookingInfo.name,
-          qNumber: 2,
-          date: dayjs().format("DD MMMM YYYY"),
-          time: dayjs().format("h:mm A"),
-        }
-      );
+    io.to(`${bookingInfo.shopName}`).emit(
+      "check_queue",
+      // (mocking) DB_reservation
+      {
+        data: "Check Queue",
+        id: bookingInfo.userId,
+        name: bookingInfo.name,
+        queueNumber: "",
+        date: dayjs().format("DD MMMM YYYY"),
+        time: dayjs().format("h:mm A"),
+      }
+    );
   });
 
-  socket.on("booking for customer", (onstieData) => {
+  socket.on("confirm_booking", (bookingInfo) => {
+    console.log(bookingInfo);
+  });
+  // socket.on("booking", (bookingInfo) => {
+  //   io.to(`${bookingInfo.userId}`)
+  //     .to(`${bookingInfo.shopName}`)
+  //     .emit(
+  //       "ticket",
+  //       // (mocking) DB_reservation
+  //       {
+  //         data: "Online Queue Detail",
+  //         id: bookingInfo.userId,
+  //         name: bookingInfo.name,
+  //         queueNumber: 2,
+  //         date: dayjs().format("DD MMMM YYYY"),
+  //         time: dayjs().format("h:mm A"),
+  //       }
+  //     );
+  // });
+
+  socket.on("booking_for_customer", (onstieData) => {
     io.to(`${onstieData.shopName}`).emit(
-      "onsite queue",
+      "onsite_queue",
       // (mocking) DB_reservation
       {
         data: "Onsite Queue",
         id: onstieData.userId,
         name: onstieData.name,
         mobile: mobileFormat(onstieData.mobile),
-        qNumber: 3,
+        queueNumber: "",
         date: dayjs().format("DD MMMM YYYY"),
         time: dayjs().format("h:mm A"),
       }
@@ -76,14 +94,14 @@ io.on("connect", (socket) => {
 
   //!!cancel booking and delete DB_reservation
   socket.on("cancel", (cancelInfo) => {
-    io.to(`${cancelInfo.shopName}`).emit("cancel queue", {
+    io.to(`${cancelInfo.shopName}`).emit("cancel_queue", {
       userId: cancelInfo.userId,
     });
   });
 
   //disconnect status
   socket.on("disconnect", () => {
-    console.log("disconnected");
+    console.log(socket.id, "disconnected");
   });
 });
 // socket.io >>>>>>>>>>>>>>>>>>
