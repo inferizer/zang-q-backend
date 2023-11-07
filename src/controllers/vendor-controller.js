@@ -7,6 +7,11 @@ const { vendorRegisterSchema, vendorLoginSchema } = require('../validator/vendor
 const createError = require('../utils/create-error');
 const VENDOR = "vendor"
 
+const type_id_validation = async (data) =>{
+  const existType = await prisma.type.findMany()
+
+
+}
 const hdl_application_body = (body) => {
   const data = {}
   if (body.shopName) data.shopName = body.shopName
@@ -25,11 +30,12 @@ exports.register = async (req, res, next) => {
 
 
     const { value, error } = vendorRegisterSchema.validate(req.body)
-    const existEmail = prisma.shopAccount.findFirst({
+    const existEmail = await prisma.shopAccount.findUnique({
       where:{
         email:value.email
       }
     })
+    console.log(existEmail)
     if(existEmail) return next(createError("Email already in used",400))
     if (error) return next(error)
     value.password = await bcrypt.hash(value.password, 10)
@@ -103,7 +109,7 @@ exports.application = async (req, res, next) => {
       const result = await cloudinary(req.files.idCard[0].path)
       data.idCard = result
     }
-    console.log("this is data", data)
+  
     const application = await prisma.shops.create({
       data: data
 
@@ -125,6 +131,42 @@ exports.application = async (req, res, next) => {
     }
 
 
+  }
+
+}
+
+exports.getAllCategory  = async ( req,res,next) =>{
+  const result = await prisma.type.findMany()
+  res.status(200).json({result})
+}
+
+exports.addVendorCategory =  async (req,res,next) => {
+  try{
+
+    let data = req.body
+
+    for(let i of data){
+      console.log(i)
+    }
+
+    const existCategory = await prisma.type.findMany()
+    
+    
+   
+
+  
+    // const { role } = req.user
+    // if (role != VENDOR) return next(createError("only vendor permitted", 400))
+    //  await prisma.categories.createMany({
+    //   data:data
+    // })
+
+    // res.status(200).json({message:"vendor category added"})
+    
+
+  }
+  catch(err){
+    console.log(err)
   }
 
 }
