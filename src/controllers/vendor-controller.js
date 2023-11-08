@@ -9,6 +9,16 @@ const VENDOR = "vendor"
 
 const type_id_validation = async (data) =>{
   const existType = await prisma.type.findMany()
+  for(let x of data){
+    let found =false
+    for(let y of existType){
+      if(x.typeId == y.id){
+        found = true
+      }
+    }
+    if(!found) return false
+  }
+  return true
 
 
 }
@@ -88,6 +98,12 @@ exports.application = async (req, res, next) => {
 
     if (role != VENDOR) return next(createError("only vendor permitted", 400))
     if (!req.files) return next(createError("all image required", 400))
+    const approvedApplication = await prisma.shops.findFirst({
+  where:{
+    isApprove:"approved",
+    shopAccountId: req.user.id
+  }})
+  if(approvedApplication) return next(createError("This vendor's appliation has already been approved",400))
     const existApplication = await prisma.shops.findFirst({
       where: {
         isApprove: "pending",
@@ -96,7 +112,7 @@ exports.application = async (req, res, next) => {
     })
     if (existApplication) return next(createError("only one application allow per vendor"))
     let data = {}
-    data.shopAccountId = req.user.id
+    data.shopAccountId = +req.user.id
     let req_input = hdl_application_body(req.body)
     data = { ...data, ...req_input }
 
@@ -110,13 +126,13 @@ exports.application = async (req, res, next) => {
       data.idCard = result
     }
   
-    const application = await prisma.shops.create({
+     const result = await prisma.shops.create({
       data: data
 
     })
 
 
-    res.status(200).json({ msg: "aplication registered" })
+    res.status(200).json({ message: "aplication registered",result })
 
   } catch (err) {
     console.log(err)
@@ -142,26 +158,34 @@ exports.getAllCategory  = async ( req,res,next) =>{
 
 exports.addVendorCategory =  async (req,res,next) => {
   try{
+    const { role } = req.user
+    const {shopsId} = req.params
+
+    if (role != VENDOR) return next(createError("only vendor permitted", 400))
+    
+    const approvedCategories = await prisma.categories.findFirst({
+  where:{
+    shopsId: +shopsId
+  }})
+  if(approvedCategories) return next(createError("This vendor's categories has already been approved",400))
+   const existCategoryRequest = await prisma.categories.findFirst({
+  where:{
+    shopsId: +shopsId
+  }})
+  if(existCategoryRequest) return next( createError("this vendor's categories has already been submitted",400))
 
     let data = req.body
-
+    const found = type_id_validation(data)
+    if(!found) return next(createError("invalid category",400))
     for(let i of data){
-      console.log(i)
+      i.shopsId = +shopsId
+      i.typeId = +i.typeId
     }
+     await prisma.categories.createMany({
+      data:data
+    })
 
-    const existCategory = await prisma.type.findMany()
-    
-    
-   
-
-  
-    // const { role } = req.user
-    // if (role != VENDOR) return next(createError("only vendor permitted", 400))
-    //  await prisma.categories.createMany({
-    //   data:data
-    // })
-
-    // res.status(200).json({message:"vendor category added"})
+    res.status(200).json({message:"vendor category added"})
     
 
   }
