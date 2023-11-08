@@ -54,7 +54,7 @@ model Shops {
   ownerFirstName      String
   ownerLastName       String
   idNumber            String
-  idCard              String
+  idCard              String?
   isOpen              Boolean       @default(true)
   isApprove           is_approve    @default(pending)
   Resevations         Resevations[]

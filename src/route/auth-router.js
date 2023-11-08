@@ -6,10 +6,8 @@ const router = express.Router();
 
 router.get('/',authenticate,authController.getAuthUser)
 router.post("/register", authController.register);
-router.post("/login", authController.login);
-
+router.post("/login", authController.login)
 router.post('/login/google', authController.googleLogin)
-
 router.post('/loginLine',authController.loginLine)
 
 
