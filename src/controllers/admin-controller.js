@@ -8,6 +8,7 @@ const {
 const prisma = require("../models/prisma");
 const createError = require("../utils/create-error");
 const { exist } = require("joi");
+const { createLogger } = require("redux-logger");
 const PENDING = "pending";
 const APPROVED = "approved";
 const ADMIN = "admin";
@@ -81,12 +82,18 @@ exports.rejectApplication = async (req, res, next) => {
       return next(
         createError("no application submitted from this vendor", 400)
       );
-
-    await prisma.shops.delete({
+        console.log(existApplication)
+    await prisma.shops.deleteMany({
       where: {
-        id: +id,
+        id: existApplication.id,
       },
     });
+
+    await prisma.categories.deleteMany({
+      where:{
+        shopsId: +id
+      }
+    })
 
     const result = await prisma.shops.findMany({
       where: {
