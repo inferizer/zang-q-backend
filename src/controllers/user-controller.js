@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 const prisma = require('../models/prisma')
 exports.resevation = async (req, res, next) => {
     try {
@@ -50,3 +51,26 @@ exports.resevation = async (req, res, next) => {
 }
   ;
   
+=======
+const prisma = require("../models/prisma") 
+exports.getallShop = async (req,res,next) => {
+const result = await prisma.shops.findMany({
+    include:{
+        Categories:{
+            include:{
+                type:{
+                    select:{
+                        name:true
+                    }
+                }
+            }
+        }
+    },
+    where:{
+        isApprove:"approved"
+    }
+})
+
+res.status(200).json({result})
+}
+>>>>>>> dde55d4d2b0d977c388b6c960e455126f9d2ab07

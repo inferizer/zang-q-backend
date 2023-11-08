@@ -10,7 +10,7 @@ datasource db {
 model Users {
   id           Int           @id @default(autoincrement())
   username     String?       @unique
-  name         String?        
+  name         String?
   email        String?       @unique
   mobile       String?       @unique
   facebookId   String?
@@ -58,10 +58,10 @@ model Shops {
   isOpen              Boolean       @default(true)
   isApprove           is_approve    @default(pending)
   Resevations         Resevations[]
-  Categories          Categories[]
   Branchs             Branchs[]
   shopAccount         ShopAccount   @relation(fields: [shopAccountId], references: [id])
   shopAccountId       Int
+  Categories          Categories[]
 }
 
 model ShopAccount {
@@ -73,12 +73,12 @@ model ShopAccount {
 }
 
 model Categories {
-  id     Int    @id @default(autoincrement())
+  id     Int   @id @default(autoincrement())
   typeId Int
-  type   Type   @relation(fields: [typeId], references: [id])
-  shopId Int
-  shop   Shops  @relation(fields: [shopId], references: [id])
-  name   String
+  type   Type  @relation(fields: [typeId], references: [id])
+  shops  Shops @relation(fields: [shopsId], references: [id])
+
+  shopsId Int
 }
 
 model Type {
