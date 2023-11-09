@@ -46,7 +46,6 @@ const check_role = async (req) => {
     })
     return user
   }
-
   const user = await prisma.users.findFirst({
     where: {
       id: req.user.id
@@ -91,7 +90,7 @@ exports.login = async (req, res, next) => {
     const { value, error } = UserLoginSchema.validate(req.body)
     if (error) {
       return next(error);
-    }
+    } 
     const user = await user_login(value)
     if (!user) {
       return next(createError('invalid Login', 400));
