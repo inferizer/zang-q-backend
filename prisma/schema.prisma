@@ -26,13 +26,13 @@ model Users {
 }
 
 model Resevations {
-  id          Int         @id @default(autoincrement())
-  userId      Int
-  user        Users       @relation(fields: [userId], references: [id])
-  shopId      Int
-  shop        Shops       @relation(fields: [shopId], references: [id])
-  branchId    Int
-  branch      Branchs     @relation(fields: [branchId], references: [id])
+  id       Int   @id @default(autoincrement())
+  userId   Int
+  user     Users @relation(fields: [userId], references: [id])
+  shopId   Int
+  shop     Shops @relation(fields: [shopId], references: [id])
+  branchId Int
+
   queueNumber Int
   status      Status
   type        reservation
@@ -40,7 +40,7 @@ model Resevations {
 }
 
 model Shops {
-  id                  Int           @id @default(autoincrement())
+  id                  Int               @id @default(autoincrement())
   registerationNumber String?
   registertionPic     String?
   shopName            String
@@ -55,13 +55,12 @@ model Shops {
   ownerLastName       String
   idNumber            String
   idCard              String
-  isOpen              Boolean       @default(true)
-  isApprove           is_approve    @default(pending)
+  isOpen              Boolean           @default(true)
+  isApprove           is_approve        @default(pending)
   Resevations         Resevations[]
-  Branchs             Branchs[]
-  shopAccount         ShopAccount   @relation(fields: [shopAccountId], references: [id])
+  shopAccount         ShopAccount       @relation(fields: [shopAccountId], references: [id])
   shopAccountId       Int
-  Categories          Categories[]
+  ShopsCategories     ShopsCategories[]
 }
 
 model ShopAccount {
@@ -72,36 +71,19 @@ model ShopAccount {
   Shops    Shops[]
 }
 
+model ShopsCategories {
+  id           Int        @id @default(autoincrement())
+  categories   Categories @relation(fields: [categoriesId], references: [id])
+  shop         Shops      @relation(fields: [shopsId], references: [id])
+  shopsId      Int
+  categoriesId Int
+}
+
 model Categories {
-  id     Int   @id @default(autoincrement())
-  typeId Int
-  type   Type  @relation(fields: [typeId], references: [id])
-  shops  Shops @relation(fields: [shopsId], references: [id])
+  id Int @id @default(autoincrement())
 
-  shopsId Int
-}
-
-model Type {
-  id         Int          @id @default(autoincrement())
-  name       String
-  Categories Categories[]
-}
-
-model Branchs {
-  id          Int           @id @default(autoincrement())
-  shopId      Int
-  shop        Shops         @relation(fields: [shopId], references: [id])
-  name        String
-  Resevations Resevations[]
-  Location    Location[]
-}
-
-model Location {
-  id       Int     @id @default(autoincrement())
-  branchId Int
-  branch   Branchs @relation(fields: [branchId], references: [id])
-  lat      String
-  long     String
+  name            String
+  ShopsCategories ShopsCategories[]
 }
 
 enum Role {
