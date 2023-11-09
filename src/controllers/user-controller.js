@@ -19,3 +19,23 @@ const result = await prisma.shops.findMany({
 
 res.status(200).json({result})
 }
+
+
+exports.getallCategory = async (req,res,next) => {
+    const result = await prisma.categories.findMany({
+        include:{
+            Categories:{
+                include:{
+                    shops:{
+                        select:{
+                            shopPicture:true,
+                            shopName:true
+                        }
+
+                    }
+                }
+            }
+        }
+    })
+    res.status(200).json({result})
+}
