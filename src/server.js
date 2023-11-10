@@ -25,8 +25,8 @@ io.on("connect", (socket) => {
     socket.join(roomInfo);
   });
 
-  socket.on("booking", (bookingInfo) => {
-    // console.log(bookingInfo);
+  socket.on("booking", ({ bookingInfo }) => {
+    console.log(bookingInfo);
 
     socket.to(`${bookingInfo.shopName}`).emit(
       "check_queue",
