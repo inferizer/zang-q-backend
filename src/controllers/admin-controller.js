@@ -8,6 +8,7 @@ const {
 const prisma = require("../models/prisma");
 const createError = require("../utils/create-error");
 const { exist } = require("joi");
+const { createLogger } = require("redux-logger");
 const PENDING = "pending";
 const APPROVED = "approved";
 const ADMIN = "admin";
@@ -81,12 +82,18 @@ exports.rejectApplication = async (req, res, next) => {
       return next(
         createError("no application submitted from this vendor", 400)
       );
-
-    await prisma.shops.delete({
+        console.log(existApplication)
+    await prisma.shops.deleteMany({
       where: {
-        id: +id,
+        id: existApplication.id,
       },
     });
+
+    await prisma.shopsCategories.deleteMany({
+      where:{
+        shopsId: +id
+      }
+    })
 
     const result = await prisma.shops.findMany({
       where: {
@@ -157,7 +164,7 @@ exports.getAllCategory =  async( req,res,next) =>{
     return next(
       createError("Only admin is allowed to perform this action", 400)
     );
-    const result = await prisma.type.findMany()
+    const result = await prisma.categories.findMany()
     res.status(200).json({result})
 
 }
@@ -170,16 +177,16 @@ exports.createCategory = async (req, res, next) => {
     );
   const { value, error } = categorySchema.validate(req.body);
   if (error) return next(error);
-  const existCategory = await prisma.type.findMany();
+  const existCategory = await prisma.categories.findMany();
   for (let i of existCategory) {
     if (value.name.toUpperCase() == i.name.toUpperCase())
       return next(createError("category already exist", 400));
   }
-   await prisma.type.create({
+   await prisma.categories.create({
     data: value,
   });
 
-  const result = await prisma.type.findMany()
+  const result = await prisma.categories.findMany()
   res.status(200).json({ result });
 };
 exports.updateCategory = async (req,res,next) => {
@@ -190,13 +197,13 @@ exports.updateCategory = async (req,res,next) => {
     if (role != ADMIN)
     return next(createError ("Only admin is allowed to perform this action",400))
   
-  const selectedCategory = await prisma.type.findUnique({
+  const selectedCategory = await prisma.categories.findUnique({
     where:{
       id:id
     }
   })
   if(!selectedCategory) return next(createError("please provide valid category",400))
-  await prisma.type.update({
+  await prisma.categories.update({
 where:{
   id:selectedCategory.id
 },
@@ -204,7 +211,7 @@ data:{
   name:name
 }
 })
-const result = await prisma.type.findMany()
+const result = await prisma.categories.findMany()
 res.status(200).json({result})
 
 
@@ -224,18 +231,18 @@ exports.deleteCategory = async (req,res,next) => {
   400
   ))
   
-  const selectedCategory = await prisma.type.findFirst({
+  const selectedCategory = await prisma.categories.findFirst({
     where:{
       id:+id
     }
   })
   if(!selectedCategory) return next(createError("please provide valid category",400))
-  await prisma.type.delete({
+  await prisma.categories.delete({
 where:{
   id: selectedCategory.id
 }})
 
-const result  = await prisma.type.findMany()
+const result  = await prisma.categories.findMany()
 
 res.status(200).json({result})
 }
