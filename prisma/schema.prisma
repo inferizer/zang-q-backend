@@ -31,8 +31,6 @@ model Resevations {
   user     Users @relation(fields: [userId], references: [id])
   shopId   Int
   shop     Shops @relation(fields: [shopId], references: [id])
-  branchId Int
-
   queueNumber Int
   status      Status
   type        reservation
