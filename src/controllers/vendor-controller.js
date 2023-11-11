@@ -8,12 +8,12 @@ const createError = require('../utils/create-error');
 const { any } = require('joi')
 const VENDOR = "vendor"
 
-const type_id_validation = async (data) =>{
-  const existType = await prisma.categories.findMany()
+const categories_id_validation = async (data) =>{
+  const existcategories = await prisma.categories.findMany()
   for(let x of data){
     let found =false
-    for(let y of existType){
-      if(x.typeId == y.id){
+    for(let y of existcategories){
+      if(x.categoriesId == y.id){
         found = true
       }
     }
@@ -176,11 +176,11 @@ exports.addVendorCategory = async (req, res, next) => {
   if(existCategoryRequest) return next( createError("this vendor's categories has already been submitted",400))
 
     let data = req.body
-    const found = type_id_validation(data)
-    if (!found) return next(createError("invalid category", 400))
-    for (let i of data) {
+    const found = categories_id_validation(data)
+    if(!found) return next(createError("invalid category",400))
+    for(let i of data){
       i.shopsId = +shopsId
-      i.typeId = +i.typeId
+      i.categoriesId = +i.categoriesId
     }
      await prisma.shopsCategories.createMany({
       data:data
