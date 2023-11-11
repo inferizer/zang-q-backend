@@ -9,7 +9,7 @@ const adminRoute = require("./route/admin-route");
 const userRoute = require("./route/user_route");
 const notFoundMiddleware = require("./middlewares/not-founded");
 const errorMiddleware = require("./middlewares/error");
-const PORT = process.env.PORT || "5002";
+const PORT = process.env.PORT || "4000";
 
 const app = express();
 
