@@ -95,23 +95,3 @@ exports.resevation = async (req, res, next) => {
 }
   ;
 
-  
-
-exports.getallCategory = async (req,res,next) => {
-    const result = await prisma.categories.findMany({
-        include:{
-            Categories:{
-                include:{
-                    shops:{
-                        select:{
-                            shopPicture:true,
-                            shopName:true
-                        }
-
-                    }
-                }
-            }
-        }
-    })
-    res.status(200).json({result})
-}
