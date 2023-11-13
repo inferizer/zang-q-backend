@@ -3,8 +3,9 @@ const { Server } = require("socket.io");
 const FRONT_URL = process.env.FRONT_URL || "http://localhost:5173";
 const dayjs = require("dayjs");
 const utc = require("dayjs/plugin/utc");
+const prisma = require("./models/prisma");
+const delKeyObj = require("./utils/delKeyObj");
 dayjs.extend(utc);
-const mobileFormat = require("./utils/mobileFormat");
 
 const io = new Server(server, {
   cors: {
@@ -25,70 +26,77 @@ io.on("connect", (socket) => {
     socket.join(roomInfo);
   });
 
-  socket.on("booking", ({ bookingInfo }) => {
-    console.log(bookingInfo);
+  socket.on("booking", ({ bookingInfo }, seat) => {
+    const editBookingInfo = {
+      name: bookingInfo.name,
+      userId: bookingInfo.userId,
+      shopId: bookingInfo.shopId,
+      queueNumber: "",
+      seat,
+      type: bookingInfo.type,
+      socket: bookingInfo.socket,
+      date: dayjs().format("DD MMMM YYYY"),
+      time: dayjs().format("h:mm A"),
+    };
 
-    socket.to(`${bookingInfo.shopName}`).emit(
-      "check_queue",
-      // (mocking) DB_reservation
-      {
-        data: "Check Queue",
-        userId: bookingInfo.userId,
-        name: bookingInfo.name,
-        queueNumber: "",
-        socket: socket.id,
-        date: dayjs().format("DD MMMM YYYY"),
-        time: dayjs().format("h:mm A"),
-      }
-    );
+    socket.to(`${bookingInfo.shopId}`).emit("check_queue", editBookingInfo);
   });
 
-  socket.on("get_queue", (bookingConfirm) => {
+  socket.on("booking_for_customer", (bookingInfo, seat) => {
+    // console.log(bookingInfo, seat);
+    const editBookingInfo = {
+      name: bookingInfo.name,
+      userId: bookingInfo.userId,
+      shopId: bookingInfo.shopId,
+      queueNumber: "",
+      seat,
+      type: bookingInfo.type,
+      socket: bookingInfo.socket,
+      date: dayjs().format("DD MMMM YYYY"),
+      time: dayjs().format("h:mm A"),
+    };
+
+    io.to(`${bookingInfo.shopId}`).emit("check_queue", editBookingInfo);
+  });
+
+  socket.on("confirm_booking", async (bookingConfirm) => {
     console.log(bookingConfirm);
-    socket.to(bookingConfirm.socket).emit("ticket", bookingConfirm);
+    const editBookingConfirm = { ...bookingConfirm };
+    keyToDel = ["name", "socket"];
+    delKeyObj(editBookingConfirm, keyToDel);
+    console.log(editBookingConfirm);
+    const result = await prisma.resevations.create({
+      data: editBookingConfirm,
+    });
+    const newBookingConfirm = { ...bookingConfirm, id: result.id };
+
+    socket.to(bookingConfirm.socket).emit("ticket", newBookingConfirm);
   });
 
-  socket.on("confirm_booking", (bookingConfirm) => {
-    console.log(bookingConfirm);
-    socket.to(bookingConfirm.socket).emit("ticket", bookingConfirm);
-  });
-  // socket.on("booking", (bookingInfo) => {
-  //   io.to(`${bookingInfo.userId}`)
-  //     .to(`${bookingInfo.shopName}`)
-  //     .emit(
-  //       "ticket",
-  //       // (mocking) DB_reservation
-  //       {
-  //         data: "Online Queue Detail",
-  //         id: bookingInfo.userId,
-  //         name: bookingInfo.name,
-  //         queueNumber: 2,
-  //         date: dayjs().format("DD MMMM YYYY"),
-  //         time: dayjs().format("h:mm A"),
-  //       }
-  //     );
+  // socket.on("booking_for_customer", (onstieData) => {
+  //   // console.log(onstieData);
+  //   io.to(`${onstieData.shopId}`).emit(
+  //     "onsite_queue",
+  //     // (mocking) DB_reservation
+  //     {
+  //       data: "Onsite Queue",
+  //       name: onstieData.name,
+  //       queueNumber: "",
+  //       type: onstieData.type,
+  //       date: dayjs().format("DD MMMM YYYY"),
+  //       time: dayjs().format("h:mm A"),
+  //     }
+  //   );
   // });
 
-  socket.on("booking_for_customer", (onstieData) => {
-    io.to(`${onstieData.shopName}`).emit(
-      "onsite_queue",
-      // (mocking) DB_reservation
-      {
-        data: "Onsite Queue",
-        id: onstieData.userId,
-        name: onstieData.name,
-        mobile: mobileFormat(onstieData.mobile),
-        queueNumber: "",
-        date: dayjs().format("DD MMMM YYYY"),
-        time: dayjs().format("h:mm A"),
-      }
-    );
-  });
-
   //!!cancel booking and delete DB_reservation
-  socket.on("cancel", (cancelInfo) => {
-    io.to(`${cancelInfo.shopName}`).emit("cancel_queue", {
+  socket.on("cancel", async (cancelInfo) => {
+    io.to(`${cancelInfo.shopId}`).emit("cancel_queue", {
       userId: cancelInfo.userId,
+    });
+    await prisma.resevations.update({
+      where: { id: cancelInfo.id },
+      data: { status: "cancelled" },
     });
   });
 
