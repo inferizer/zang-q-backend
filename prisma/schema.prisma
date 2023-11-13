@@ -9,8 +9,7 @@ datasource db {
 
 model Users {
   id           Int           @id @default(autoincrement())
-  username     String?       @unique
-  name         String?
+  username     String?
   email        String?       @unique
   mobile       String?       @unique
   facebookId   String?
@@ -26,17 +25,18 @@ model Users {
 }
 
 model Resevations {
-  id       Int   @id @default(autoincrement())
-  userId   Int
-  user     Users @relation(fields: [userId], references: [id])
-  shopId   Int
-  shop     Shops @relation(fields: [shopId], references: [id])
-  branchId Int
-
-  queueNumber Int
-  status      Status
+  id          Int         @id @default(autoincrement())
+  userId      Int?
+  user        Users?      @relation(fields: [userId], references: [id])
+  shopId      Int
+  shop        Shops       @relation(fields: [shopId], references: [id])
+  queueNumber Int         @map("queue_number")
+  status      Status      @default(pending)
   type        reservation
   createdAt   DateTime    @default(now())
+  date        String
+  time        String
+  seat        Int
 }
 
 model Shops {
@@ -80,7 +80,7 @@ model ShopsCategories {
 }
 
 model Categories {
-  id Int @id @default(autoincrement())
+  id              Int               @id @default(autoincrement())
   name            String
   ShopsCategories ShopsCategories[]
 }
