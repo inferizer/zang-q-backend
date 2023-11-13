@@ -30,17 +30,24 @@ const user_login = async (value) => {
 };
 
 const check_role = async (req) => {
-  const VENDOR = "vendor";
-
+  // if(req.body == )
+  if (req.body.hasOwnProperty('lineId')) {
+    const user = await prisma.users.findUnique({
+      where: {
+        lineId: req.body.lineId
+      }
+    })
+    return user
+  }
+  const VENDOR = "vendor"
   if (req.user.role == VENDOR) {
     const user = await prisma.shopAccount.findUnique({
       where: {
-        id: req.user.id,
-      },
-    });
-    return user;
+        id: req.user.id
+      }
+    })
+    return user
   }
-
   const user = await prisma.users.findFirst({
     where: {
       id: req.user.id,
@@ -178,7 +185,7 @@ exports.loginLine = async (req, res, next) => {
   } catch (err) {
     next(err);
   }
-};
+}
 
 // exports.test = async (req,res,next) => {
 // try {

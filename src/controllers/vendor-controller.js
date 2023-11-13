@@ -194,6 +194,31 @@ exports.addVendorCategory = async (req, res, next) => {
   }
 };
 
+exports.findResevation = async (req, res, next) => {
+  const { id } = req.user;
+  const { shopId } = req.body;
+  try {
+    const currentVendor = await prisma.shops.findMany({
+      where: {
+        shopAccountId: id,
+      },
+    });
+    const shopId = currentVendor.length > 0 ? currentVendor[0].id : null;
+    const result = await prisma.resevations.findMany({
+      where: {
+        shopId: shopId,
+      },
+      include: {
+        user: true,
+      },
+    });
+    console.log(result);
+    res.status(200).json({ result });
+  } catch (err) {
+    console.log(err);
+  }
+};
+
 exports.getMyShop = async (req, res, next) => {
   const { id } = req.user;
   try {
@@ -205,5 +230,67 @@ exports.getMyShop = async (req, res, next) => {
     res.status(201).json({ result });
   } catch (err) {
     console.log(err);
+  }
+};
+
+exports.deleteResevation = async (req, res, next) => {
+  const { id } = req.params;
+  try {
+    const cancel = await prisma.resevations.delete({
+      where: {
+        id: +id,
+      },
+    });
+    res.status(201).json({ cancel });
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.approveResevation = async (req, res, next) => {
+  try {
+    const { id } = req.body;
+    const result = await prisma.resevations.update({
+      where: { id: id },
+      data: {
+        status: "accepted",
+      },
+    });
+    res.status(201).json({ result });
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.rejectedResevation = async (req, res, next) => {
+  const { userId } = req.body;
+  try {
+    const result = await prisma.resevations.update({
+      where: {
+        userId: userId,
+      },
+      data: {
+        status: "cancelled",
+      },
+    });
+    console.log(req.body);
+    res.status(201).json({ result });
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.closeQueue = async (req, res, next) => {
+  try {
+    const { id } = req.body;
+    const result = await prisma.resevations.update({
+      where: { id: id },
+      data: {
+        isOpen: false,
+      },
+    });
+    res.status(201).json({ result });
+  } catch (err) {
+    next(err);
   }
 };

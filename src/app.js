@@ -7,10 +7,10 @@ const authRoute = require("./route/auth-router");
 const vendorRoute = require("./route/vendor-route");
 const testRoute = require("./route/test");
 const adminRoute = require("./route/admin-route");
-const userRoute = require("./route/user_route");
+const userRoute = require("./route/user-route");
 const notFoundMiddleware = require("./middlewares/not-founded");
 const errorMiddleware = require("./middlewares/error");
-const http = require("http");
+const http = require("http");   
 const server = http.createServer(app);
 
 app.use(cors());
