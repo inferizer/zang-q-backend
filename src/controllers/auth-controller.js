@@ -152,9 +152,11 @@ exports.loginLine = async (req, res, next) => {
       }
     })
     if (existLineUser) {
+    
       const payload = {
         userId: existLineUser.id, role: existLineUser.role
       };
+      console.log(payload)
       const accessToken = createToken(payload)
       let user = existLineUser
       console.log(user)
