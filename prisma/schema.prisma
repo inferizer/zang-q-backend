@@ -96,8 +96,11 @@ model Location {
 }
 
 model Type {
-  id   Int    @id @default(autoincrement())
-  name String
+  id              Int               @id @default(autoincrement())
+  name            String
+  id              Int               @id @default(autoincrement())
+  name            String
+  ShopsCategories ShopsCategories[]
 }
 
 enum Role {
