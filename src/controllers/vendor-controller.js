@@ -251,7 +251,7 @@ exports.deleteResevation = async (req, res, next) => {
 
 exports.approveResevation = async (req, res, next) => {
   try {
-    const { id } = req.user;
+    const { id } = req.body;
     const result = await prisma.resevations.update({
       where: { id: id },
       data: {
@@ -276,6 +276,21 @@ exports.rejectedResevation = async (req, res, next) => {
       },
     });
     console.log(req.body)
+    res.status(201).json({ result })
+  } catch (err) {
+    next(err)
+  }
+}
+
+exports.closeQueue= async (req, res, next) => {
+  try {
+    const { id } = req.body;
+    const result = await prisma.resevations.update({
+      where: { id: id },
+      data: {
+        isOpen: false,
+      },
+    });
     res.status(201).json({ result })
   } catch (err) {
     next(err)
