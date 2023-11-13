@@ -81,7 +81,6 @@ model ShopsCategories {
 
 model Categories {
   id Int @id @default(autoincrement())
-
   name            String
   ShopsCategories ShopsCategories[]
 }
