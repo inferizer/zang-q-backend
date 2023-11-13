@@ -10,7 +10,7 @@ const adminRoute = require("./route/admin-route");
 const userRoute = require("./route/user-route");
 const notFoundMiddleware = require("./middlewares/not-founded");
 const errorMiddleware = require("./middlewares/error");
-const http = require("http");
+const http = require("http");   
 const server = http.createServer(app);
 
 app.use(cors());
