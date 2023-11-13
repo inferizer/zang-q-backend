@@ -17,5 +17,9 @@ router.post(
 );
 router.get("/category", vendorController.getAllCategory);
 router.post("/category/:shopsId", authenticate, vendorController.addVendorCategory);
-
-module.exports = router;
+router.get('/findallshop', authenticate, vendorController.findResevation)
+router.get('/getMyShop',authenticate,vendorController.getMyShop)
+router.patch("/accept",vendorController.approveResevation)
+router.patch("/canceled",vendorController.rejectedResevation)
+router.patch('/close',authenticate,vendorController.closeQueue)
+module.exports = router;  

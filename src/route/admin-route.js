@@ -19,3 +19,4 @@ router.patch("/category", authenticate, adminController.updateCategory);
 router.delete("/category/:id", authenticate, adminController.deleteCategory);
 
 module.exports = router;
+    
