@@ -16,6 +16,11 @@ router.post(
   vendorController.application
 );
 router.get("/category", vendorController.getAllCategory);
-router.post("/category/:shopsId", authenticate, vendorController.addVendorCategory);
+router.post(
+  "/category/:shopsId",
+  authenticate,
+  vendorController.addVendorCategory
+);
+router.get("/getMyShop", authenticate, vendorController.getMyShop);
 
 module.exports = router;

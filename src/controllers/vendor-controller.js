@@ -193,3 +193,17 @@ exports.addVendorCategory = async (req, res, next) => {
     console.log(err);
   }
 };
+
+exports.getMyShop = async (req, res, next) => {
+  const { id } = req.user;
+  try {
+    const result = await prisma.shops.findMany({
+      where: {
+        shopAccountId: id,
+      },
+    });
+    res.status(201).json({ result });
+  } catch (err) {
+    console.log(err);
+  }
+};
