@@ -2,7 +2,7 @@
 const bcrypt = require('bcryptjs');
 const createToken  = require('../utils/jwt')
 const createError = require('../utils/create-error');
-const { UserRegisterSchema, UserLoginSchema,GoogleLoginSchema } = require('../validator/auth-validator');
+const { UserRegisterSchema, UserLoginSchema,GoogleLoginSchema,UserEditSchema } = require('../validator/auth-validator');
 const prisma = require('../models/prisma')
 const user_login = async (value) =>{
   if(value.mobile){
@@ -36,8 +36,21 @@ const check_role = async (req) => {
     const user = await prisma.shopAccount.findUnique({
       where:{
         id:req.user.id
+      },
+      include:{
+        Shops:{
+          select:{
+            shopName:true,
+            shopPicture:true
+          },
+          where:{
+            shopAccountId:req.user.id
+          }
+        }
       }
     })
+
+  
   return user
   }
 
@@ -48,6 +61,10 @@ const check_role = async (req) => {
   })
   return user
 }
+
+
+
+
 exports.getAuthUser =  async (req,res,next) =>{
   
   try{
@@ -178,13 +195,36 @@ exports.loginLine = async (req, res, next) => {
     next(err);
   }
 };
+exports.editUser = async (req,res,next)=>{
+  try{
+    const {id} = req.params
+    if(!req.file){
+    const {value,error} = UserEditSchema.validate(req.body)
+    if(error) return (next(error))
+    const existUser = await prisma.users.findUnique({
+      where:{
+        id:+id
+      }
+    })
+  if(!existUser) return next(createError("this user does not exist",400))
+  console.log(value)
+}
 
-// exports.test = async (req,res,next) => {
-// try {
-//   const { } = res.body 
-  
-//   res.status(200).json({msg: 'hi'})
-// } catch (err) {
-//   next(err)
-// }
-// }
+if(req.file){
+
+  console.log('image here')
+}
+
+
+
+
+
+
+  }
+  catch(err){
+    next(err)
+  }
+
+}
+
+

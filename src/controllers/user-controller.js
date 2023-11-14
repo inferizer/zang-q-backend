@@ -39,3 +39,5 @@ exports.getallCategory = async (req, res, next) => {
   });
   res.status(200).json({ result });
 };
+
+
