@@ -27,5 +27,6 @@ router.patch("/accept", vendorController.approveResevation);
 router.patch("/canceled", vendorController.rejectedResevation);
 router.patch("/close", authenticate, vendorController.closeQueue);
 router.patch("/open", authenticate, vendorController.openShop);
+router.post("/history",authenticate,vendorController.historyResevation)
 
 module.exports = router;
