@@ -5,7 +5,7 @@ const upload_middleware = require("../middlewares/multer");
 
 const router = express.Router();
 
-router.get('/',authenticate,authController.getAuthUser)
+router.get("/", authenticate, authController.getAuthUser);
 router.post("/register", authController.register);
 router.post("/login", authController.login)
 router.post('/login/google', authController.googleLogin)
