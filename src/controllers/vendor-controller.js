@@ -257,35 +257,35 @@ exports.deleteResevation = async (req, res, next) => {
 exports.approveResevation = async (req, res, next) => {
   try {
     const { id } = req.body;
+    console.log(id);
     const result = await prisma.resevations.update({
-      where: { id: id },
+      where: { id: +id },
       data: {
         status: "accepted",
       },
     });
-    res.status(201).json({ result })
+    res.status(201).json({ result });
   } catch (err) {
-    next(err)
+    next(err);
   }
-}
-
+};
 exports.rejectedResevation = async (req, res, next) => {
-  const { userId } = req.body
+  const { id } = req.body;
   try {
     const result = await prisma.resevations.update({
       where: {
-        userId: userId
+        id: +id,
       },
       data: {
         status: "cancelled",
       },
     });
-    console.log(req.body)
-    res.status(201).json({ result })
+
+    res.status(201).json({ result });
   } catch (err) {
-    next(err)
+    next(err);
   }
-}
+};
 
 exports.closeQueue = async (req, res, next) => {
   try {
@@ -320,12 +320,12 @@ exports.historyResevation  =  async (req, res, next) => {
   const { shopId,value } = req.body
   try {
     const convertFormat = dateFormat(value)
-    console.log(convertFormat)  
+    console.log(convertFormat)
     const result = await prisma.resevations.findMany({
       where: {
         shopId: shopId,
         date: convertFormat
-      },  
+      },
       include : {
         user: true
       }
