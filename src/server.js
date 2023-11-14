@@ -5,6 +5,7 @@ const dayjs = require("dayjs");
 const utc = require("dayjs/plugin/utc");
 const prisma = require("./models/prisma");
 const delKeyObj = require("./utils/delKeyObj");
+const dateFormat = require("./utils/dateFormat");
 dayjs.extend(utc);
 
 const io = new Server(server, {
@@ -62,7 +63,7 @@ io.on("connect", (socket) => {
   socket.on("confirm_booking", async (bookingConfirm) => {
     console.log(bookingConfirm);
     const editBookingConfirm = { ...bookingConfirm };
-    keyToDel = ["name", "socket"];
+    keyToDel = ["name"];
     delKeyObj(editBookingConfirm, keyToDel);
     console.log(editBookingConfirm);
     const result = await prisma.resevations.create({
@@ -88,6 +89,11 @@ io.on("connect", (socket) => {
   //     }
   //   );
   // });
+
+  socket.on("vendor_cancel", (socket) => {
+    console.log("test", socket);
+    socket.to(socket).emit("cancel_ticket");
+  });
 
   //!!cancel booking and delete DB_reservation
   socket.on("cancel", async (cancelInfo) => {
