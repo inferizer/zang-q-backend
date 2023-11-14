@@ -8,96 +8,78 @@ datasource db {
 }
 
 model Users {
-  id         Int     @id @default(autoincrement())
-  username   String? @unique
-  email      String? @unique
-  mobile     String? @unique
-  facebookId String?
-  googleId   String?
-  lineId     String?
-  password   String?
-  location   String?
-  isActive   Boolean @default(true)
-  banCount   Int     @default(0)
-  role       Role    @default(user)
+  id           Int           @id @default(autoincrement())
+  username     String?
+  email        String?       @unique
+  mobile       String?       @unique
+  facebookId   String?
+  googleId     String?
+  lineId       String?
+  password     String?
+  location     String?
+  profileImage String?
+  isActive     Boolean       @default(true)
+  banCount     Int           @default(0)
+  role         Role          @default(user)
+  Resevations  Resevations[]
 }
 
 model Resevations {
-  id          Int      @id @default(autoincrement())
-  userId      Int
+  id          Int         @id @default(autoincrement())
+  userId      Int?
+  user        Users?      @relation(fields: [userId], references: [id])
   shopId      Int
-  branchId    Int
-  queueNumber Int
-  status      Status
-  createdAt   DateTime @default(now())
-
-  @@index([branchId], map: "Resevations_branchId_fkey")
-  @@index([shopId], map: "Resevations_shopId_fkey")
-  @@index([userId], map: "Resevations_userId_fkey")
+  shop        Shops       @relation(fields: [shopId], references: [id])
+  queueNumber Int         @map("queue_number")
+  status      Status      @default(pending)
+  type        reservation
+  createdAt   DateTime    @default(now())
+  date        String
+  time        String
+  seat        Int
 }
 
 model Shops {
   id                  Int               @id @default(autoincrement())
-  registerationNumber String
-  registertionPic     String
-  name                String?
-  email               String?           @unique
-  address             String?
-  shopMobile          String?
-  openingTimes        String?
-  closeingTimes       String?
+  registerationNumber String?
+  registertionPic     String?
+  shopName            String
+  shopLat             Float
+  shopLan             Float
+  shopMobile          String
+  openingTimes        String
+  closingTimes        String
   currentQueueNumber  Int?
-  picture             String?
-  priceRange          Shops_priceRange?
+  shopPicture         String
+  ownerFirstName      String
+  ownerLastName       String
+  idNumber            String
+  idCard              String
   isOpen              Boolean           @default(true)
   isApprove           is_approve        @default(pending)
+  Resevations         Resevations[]
+  shopAccount         ShopAccount       @relation(fields: [shopAccountId], references: [id])
   shopAccountId       Int
-
-  @@index([shopAccountId], map: "Shops_shopAccountId_fkey")
+  ShopsCategories     ShopsCategories[]
 }
 
 model ShopAccount {
-  id        Int     @id @default(autoincrement())
-  email     String  @unique
-  password  String
-  firstName String?
-  lastName  String?
-  mobile    String?
-  idNumber  String?
-  idCard    String?
-  role      String  @default("vendor")
+  id       Int     @id @default(autoincrement())
+  email    String  @unique
+  password String
+  role     String  @default("vendor")
+  Shops    Shops[]
+}
+
+model ShopsCategories {
+  id           Int        @id @default(autoincrement())
+  categories   Categories @relation(fields: [categoriesId], references: [id])
+  shop         Shops      @relation(fields: [shopsId], references: [id])
+  shopsId      Int
+  categoriesId Int
 }
 
 model Categories {
-  id     Int    @id @default(autoincrement())
-  typeId Int
-  shopId Int
-  name   String
-
-  @@index([shopId], map: "Categories_shopId_fkey")
-  @@index([typeId], map: "Categories_typeId_fkey")
-}
-
-model Branchs {
-  id     Int    @id @default(autoincrement())
-  shopId Int
-  name   String
-
-  @@index([shopId], map: "Branchs_shopId_fkey")
-}
-
-model Location {
-  id       Int    @id @default(autoincrement())
-  branchId Int
-  lat      String
-  long     String
-
-  @@index([branchId], map: "Location_branchId_fkey")
-}
-
-model Type {
-  id              Int               @id @default(autoincrement())
-  name            String
   id              Int               @id @default(autoincrement())
   name            String
   ShopsCategories ShopsCategories[]
@@ -120,8 +102,9 @@ enum is_approve {
   rejected
 }
 
-enum Shops_priceRange {
-  cheap
-  middle
-  expensive
+enum reservation {
+  one
+  two
+  three
+  four
 }

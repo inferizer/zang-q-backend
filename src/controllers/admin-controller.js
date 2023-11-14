@@ -44,7 +44,6 @@ exports.login = async (req, res, next) => {
     if (!user) {
       return next(createError("invalid Login", 400));
     }
-
     const compareMatch = bcrypt.compare(value.password, user.password);
     if (!compareMatch) return next(createError("invalid Login", 400));
     const payload = { userId: user.id };

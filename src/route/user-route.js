@@ -1,7 +1,10 @@
 const express = require("express");
-const authenticate = require("../middlewares/Authenticate");
 const userController = require('../controllers/user-controller')
+const authenticate = require("../middlewares/authenticate");
 const router = express.Router();
+router.post('/reservate',userController.resevation)
+router.delete('/cancel_reservate/:id',userController.cancel_reservate)
+router.get('/all_shop',userController.getAllApproveUserApplication)
 router.get("/shop",userController.getallShop)
 router.get('/category',userController.getallCategory)
 
