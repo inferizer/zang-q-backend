@@ -26,4 +26,6 @@ router.get("/getMyShop", authenticate, vendorController.getMyShop);
 router.patch("/accept", vendorController.approveResevation);
 router.patch("/canceled", vendorController.rejectedResevation);
 router.patch("/close", authenticate, vendorController.closeQueue);
+router.patch("/open", authenticate, vendorController.openShop);
+
 module.exports = router;

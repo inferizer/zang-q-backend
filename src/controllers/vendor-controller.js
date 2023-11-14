@@ -9,6 +9,9 @@ const {
 } = require("../validator/vendor-validator");
 const createError = require("../utils/create-error");
 const VENDOR = "vendor";
+const dayjs = require("dayjs");
+const utc = require("dayjs/plugin/utc");
+dayjs.extend(utc);
 
 const categories_id_validation = async (data) => {
   const existcategories = await prisma.categories.findMany();
@@ -207,12 +210,13 @@ exports.findResevation = async (req, res, next) => {
     const result = await prisma.resevations.findMany({
       where: {
         shopId: shopId,
+        status: "pending",
+        date: dayjs().format("DD MMMM YYYY"),
       },
       include: {
         user: true,
       },
     });
-    console.log(result);
     res.status(200).json({ result });
   } catch (err) {
     console.log(err);
@@ -250,8 +254,9 @@ exports.deleteResevation = async (req, res, next) => {
 exports.approveResevation = async (req, res, next) => {
   try {
     const { id } = req.body;
+    console.log(id);
     const result = await prisma.resevations.update({
-      where: { id: id },
+      where: { id: +id },
       data: {
         status: "accepted",
       },
@@ -263,17 +268,17 @@ exports.approveResevation = async (req, res, next) => {
 };
 
 exports.rejectedResevation = async (req, res, next) => {
-  const { userId } = req.body;
+  const { id } = req.body;
   try {
     const result = await prisma.resevations.update({
       where: {
-        userId: userId,
+        id: +id,
       },
       data: {
         status: "cancelled",
       },
     });
-    console.log(req.body);
+
     res.status(201).json({ result });
   } catch (err) {
     next(err);
@@ -287,6 +292,21 @@ exports.closeQueue = async (req, res, next) => {
       where: { id: id },
       data: {
         isOpen: false,
+      },
+    });
+    res.status(201).json({ result });
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.openShop = async (req, res, next) => {
+  try {
+    const { id } = req.body;
+    const result = await prisma.resevations.update({
+      where: { id: id },
+      data: {
+        isOpen: true,
       },
     });
     res.status(201).json({ result });

@@ -6,5 +6,6 @@ router.delete("/cancel_reservate/:id", userController.cancel_reservate);
 router.get("/all_shop", userController.getAllApproveUserApplication);
 router.get("/shop", userController.getallShop);
 router.get("/category", userController.getallCategory);
+router.post("/ticket", userController.getTicket);
 
 module.exports = router;
