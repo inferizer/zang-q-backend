@@ -5,7 +5,6 @@ const dayjs = require("dayjs");
 const utc = require("dayjs/plugin/utc");
 const prisma = require("./models/prisma");
 const delKeyObj = require("./utils/delKeyObj");
-const dateFormat = require("./utils/dateFormat");
 dayjs.extend(utc);
 
 const io = new Server(server, {
@@ -18,12 +17,11 @@ const io = new Server(server, {
 // socket.io >>>>>>>>>>>>>>>>>>
 io.on("connect", (socket) => {
   console.log(`>User<: ${socket.id} connected`);
-  socket.on("create_room", (roomInfo) => {
-    socket.join(roomInfo);
-  });
+  // socket.on("create_room", (roomInfo) => {
+  //   socket.join(roomInfo);
+  // });
 
-  socket.on("join_room", (roomInfo, id) => {
-    console.log(roomInfo);
+  socket.on("join_room", (roomInfo) => {
     socket.join(roomInfo);
   });
 
@@ -43,20 +41,16 @@ io.on("connect", (socket) => {
     socket.to(`${bookingInfo.shopId}`).emit("check_queue", editBookingInfo);
   });
 
-  socket.on("booking_for_customer", (bookingInfo, seat) => {
-    // console.log(bookingInfo, seat);
+  socket.on("booking_for_customer", ({ bookingInfo }, seat, name) => {
     const editBookingInfo = {
-      name: bookingInfo.name,
-      userId: bookingInfo.userId,
+      name,
       shopId: bookingInfo.shopId,
       queueNumber: "",
       seat,
       type: bookingInfo.type,
-      socket: bookingInfo.socket,
       date: dayjs().format("DD MMMM YYYY"),
       time: dayjs().format("h:mm A"),
     };
-
     io.to(`${bookingInfo.shopId}`).emit("check_queue", editBookingInfo);
   });
 

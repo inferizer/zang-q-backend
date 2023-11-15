@@ -254,7 +254,7 @@ exports.deleteResevation = async (req, res, next) => {
 exports.approveResevation = async (req, res, next) => {
   try {
     const { id } = req.body;
-    console.log(id);
+
     const result = await prisma.resevations.update({
       where: { id: +id },
       data: {
