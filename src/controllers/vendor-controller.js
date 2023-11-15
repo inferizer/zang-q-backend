@@ -219,7 +219,7 @@ exports.findResevation = async (req, res, next) => {
 
       },
     });
-    console.log(result)
+    // console.log(result)
     res.status(200).json({ result })
   } catch (err) {
     console.log(err)
@@ -289,8 +289,9 @@ exports.rejectedResevation = async (req, res, next) => {
 
 exports.closeQueue = async (req, res, next) => {
   try {
-    const { id } = req.body;
-    const result = await prisma.resevations.update({
+    const { id } = req.user;
+    console.log(req.body)
+    const result = await prisma.shops.update({  
       where: { id: id },
       data: {
         isOpen: false,
@@ -304,8 +305,8 @@ exports.closeQueue = async (req, res, next) => {
 
 exports.openShop = async (req, res, next) => {
   try {
-    const { id } = req.body;
-    const result = await prisma.resevations.update({
+    const { id } = req.user;
+    const result = await prisma.shops.update({
       where: { id: id },
       data: {
         isOpen: true,
@@ -320,7 +321,7 @@ exports.historyResevation  =  async (req, res, next) => {
   const { shopId,value } = req.body
   try {
     const convertFormat = dateFormat(value)
-    console.log(convertFormat)
+    // console.log(convertFormat)
     const result = await prisma.resevations.findMany({
       where: {
         shopId: shopId,
