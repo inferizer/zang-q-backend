@@ -3,13 +3,17 @@ const prisma = require("../models/prisma");
 const createToken = require("../utils/jwt");
 const { cloudinary } = require("../utils/cloudinary");
 const fs = require("fs/promises");
+const dateFormat = require('../utils/dateFormat')
+
 const {
   vendorRegisterSchema,
   vendorLoginSchema,
 } = require("../validator/vendor-validator");
 const createError = require("../utils/create-error");
 const VENDOR = "vendor";
-
+const dayjs = require("dayjs");
+const utc = require("dayjs/plugin/utc");
+dayjs.extend(utc);
 const categories_id_validation = async (data) => {
   const existcategories = await prisma.categories.findMany();
   for (let x of data) {
@@ -207,8 +211,9 @@ exports.findResevation = async (req, res, next) => {
     const shopId = currentVendor.length > 0 ? currentVendor[0].id : null;
     const result = await prisma.resevations.findMany({
       where: {
-        shopId: shopId
-      },
+        shopId: shopId,
+        status: "pending",
+        date: dayjs().format("DD MMMM YYYY"),      },
       include: {
         user: true,
 
@@ -252,37 +257,37 @@ exports.deleteResevation = async (req, res, next) => {
 exports.approveResevation = async (req, res, next) => {
   try {
     const { id } = req.body;
+    console.log(id);
     const result = await prisma.resevations.update({
-      where: { id: id },
+      where: { id: +id },
       data: {
         status: "accepted",
       },
     });
-    res.status(201).json({ result })
+    res.status(201).json({ result });
   } catch (err) {
-    next(err)
+    next(err);
   }
-}
-
+};
 exports.rejectedResevation = async (req, res, next) => {
-  const { userId } = req.body
+  const { id } = req.body;
   try {
     const result = await prisma.resevations.update({
       where: {
-        userId: userId
+        id: +id,
       },
       data: {
         status: "cancelled",
       },
     });
-    console.log(req.body)
-    res.status(201).json({ result })
-  } catch (err) {
-    next(err)
-  }
-}
 
-exports.closeQueue= async (req, res, next) => {
+    res.status(201).json({ result });
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.closeQueue = async (req, res, next) => {
   try {
     const { id } = req.body;
     const result = await prisma.resevations.update({
@@ -291,8 +296,43 @@ exports.closeQueue= async (req, res, next) => {
         isOpen: false,
       },
     });
-    res.status(201).json({ result })
+    res.status(201).json({ result });
   } catch (err) {
-    next(err)
+    next(err);
   }
-}
+};
+
+exports.openShop = async (req, res, next) => {
+  try {
+    const { id } = req.body;
+    const result = await prisma.resevations.update({
+      where: { id: id },
+      data: {
+        isOpen: true,
+      },
+    });
+    res.status(201).json({ result });
+  } catch (err) {
+    next(err);
+  }
+};
+exports.historyResevation  =  async (req, res, next) => {
+  const { shopId,value } = req.body
+  try {
+    const convertFormat = dateFormat(value)
+    console.log(convertFormat)
+    const result = await prisma.resevations.findMany({
+      where: {
+        shopId: shopId,
+        date: convertFormat
+      },
+      include : {
+        user: true
+      }
+    });
+    res.status(201).json({result})
+    console.log(result)
+  } catch (err) {
+    console.log(err)
+  }
+} 

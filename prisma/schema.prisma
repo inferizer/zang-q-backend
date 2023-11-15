@@ -37,6 +37,7 @@ model Resevations {
   date        String
   time        String
   seat        Int
+  socket      String?
 }
 
 model Shops {
