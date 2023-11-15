@@ -67,20 +67,37 @@ exports.login = async (req, res, next) => {
     if (error) {
       return next(error);
     }
-    const user = await prisma.shopAccount.findUnique({
+    const existUser = await prisma.shopAccount.findUnique({
       where: {
         email: value.email,
       },
+      
+  
+      
     });
 
-    if (!user) {
+    if (!existUser) {
       return next(createError("invalid Login", 400));
     }
 
-    const compareMatch = await bcrypt.compare(value.password, user.password);
+    const compareMatch = await bcrypt.compare(value.password, existUser.password);
     if (!compareMatch) {
       return next(createError("invalid Login", 400));
     }
+
+    const user = await prisma.shopAccount.findUnique({
+      where:{
+        id:existUser.id
+      },
+        include:{
+          Shops:{
+            select:{
+              shopName:true,
+              shopPicture:true
+            }
+          }
+        }
+    })
     const payload = { userId: user.id, role: user.role };
     const accessToken = createToken(payload);
     delete user.password;

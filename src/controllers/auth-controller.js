@@ -1,10 +1,13 @@
 const bcrypt = require("bcryptjs");
 const createToken = require("../utils/jwt");
 const createError = require("../utils/create-error");
+const { cloudinary } = require("../utils/cloudinary");
+const fs = require("fs/promises");
 const {
   UserRegisterSchema,
   UserLoginSchema,
-  GoogleLoginSchema,UserEditSchema,
+  GoogleLoginSchema,
+  UserEditSchema,
 } = require("../validator/auth-validator");
 const prisma = require("../models/prisma");
 const user_login = async (value) => {
@@ -30,51 +33,49 @@ const user_login = async (value) => {
 };
 
 const check_role = async (req) => {
-  // if(req.body == )
-  if (req.body.hasOwnProperty('lineId')) {
+  if (req.body.hasOwnProperty("lineId")) {
     const user = await prisma.users.findUnique({
       where: {
-        lineId: req.body.lineId
-      }
-    })
-    return user
+        lineId: req.body.lineId,
+      },
+    });
+    return user;
   }
-  const VENDOR = "vendor"
+  const VENDOR = "vendor";
   if (req.user.role == VENDOR) {
     const user = await prisma.shopAccount.findUnique({
-      where:{
-        id:req.user.id
+      where: {
+        id: req.user.id,
       },
-      include:{
-        Shops:{
-          select:{
-            shopName:true,
-            shopPicture:true
+      include: {
+        Shops: {
+          select: {
+            shopName: true,
+            shopPicture: true,
           },
-          where:{
-            shopAccountId:req.user.id
-          }
-        }
-      }
-    })
-    return user
+          where: {
+            shopAccountId: req.user.id,
+          },
+        },
+      },
+    });
+    return user;
   }
   const user = await prisma.users.findFirst({
-    where:{
-      id: req.user.id
-    }
-  })
-  return user
-}
-exports.getAuthUser =  async (req,res,next) =>{
-  
-  try{
-    const user =  await check_role(req) 
-    delete user.password
-    if(!user) return next(createError("user not found",400))
-    res.status(200).json({user})
-  } catch(err) {
-    next(err)
+    where: {
+      id: req.user.id,
+    },
+  });
+  return user;
+};
+exports.getAuthUser = async (req, res, next) => {
+  try {
+    const user = await check_role(req);
+    delete user.password;
+    if (!user) return next(createError("user not found", 400));
+    res.status(200).json({ user });
+  } catch (err) {
+    next(err);
   }
 };
 exports.register = async (req, res, next) => {
@@ -153,11 +154,6 @@ exports.googleLogin = async (req, res, next) => {
 
 exports.loginLine = async (req, res, next) => {
   const { userId, displayName } = req.body;
-  console.log(req.body);
-  // const data = {
-  //   name: userId
-  // }
-
   try {
     const lineUser = await prisma.users.findFirst({
       where: {
@@ -198,36 +194,61 @@ exports.loginLine = async (req, res, next) => {
     next(err);
   }
 };
-exports.editUser = async (req,res,next)=>{
-  try{
-    const {id} = req.params
-    if(!req.file){
-    const {value,error} = UserEditSchema.validate(req.body)
-    if(error) return (next(error))
+exports.editUser = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const data = {};
+    data.username = req.body.username;
     const existUser = await prisma.users.findUnique({
-      where:{
-        id:+id
-      }
-    })
-  if(!existUser) return next(createError("this user does not exist",400))
-  console.log(value)
-}
+      where: {
+        id: +id,
+      },
+    });
+    if (!existUser) return next(createError("this user does not exist", 400));
+    if (!req.file) {
+      const { value, error } = UserEditSchema.validate(data);
+      if (error) return next(error);
+      const newData = { ...existUser, ...value };
+      const updated = await prisma.users.update({
+        where: {
+          id: existUser.id,
+        },
+        data: newData,
+      });
+      const result = await prisma.users.findUnique({
+        where: {
+          id: updated.id,
+        },
+      });
+      return res.status(200).json({ result });
+    }
 
-if(req.file){
+    if (req.file) {
+      const { value, error } = UserEditSchema.validate(data);
+      if (error) return next(error);
+      const profileImage = await cloudinary(req.file.path);
+      value.profileImage = profileImage;
+      const newData = {...existUser,...value}
+      const updated = await prisma.users.update({
+        where: {
+          id:existUser.id
+        },
+        data:newData
+      });
 
-  console.log('image here')
-}
+      const result = await prisma.users.findUnique({
+        where:{
+          id: updated.id
+        }
+      })
 
-
-
-
-
-
+      return res.status(200).json({result});
+    }
+  } catch (err) {
+    next(err);
+  } finally {
+    if (req.file) {
+      fs.unlink(req.file.path);
+    }
   }
-  catch(err){
-    next(err)
-  }
-
-}
-
-
+};
