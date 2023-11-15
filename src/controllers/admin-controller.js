@@ -48,7 +48,7 @@ exports.login = async (req, res, next) => {
     const payload = { userId: user.id };
     const accessToken = createToken(payload);
     delete user.password;
-    res.status(200).json({ accessToken, user });
+    res.status(200).json({ accessToken, msg: "Welcome Admin!!!",user });
   } catch (err) {
     next(err);
   }

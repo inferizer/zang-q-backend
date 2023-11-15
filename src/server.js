@@ -17,12 +17,11 @@ const io = new Server(server, {
 // socket.io >>>>>>>>>>>>>>>>>>
 io.on("connect", (socket) => {
   console.log(`>User<: ${socket.id} connected`);
-  socket.on("create_room", (roomInfo) => {
-    socket.join(roomInfo);
-  });
+  // socket.on("create_room", (roomInfo) => {
+  //   socket.join(roomInfo);
+  // });
 
-  socket.on("join_room", (roomInfo, id) => {
-    console.log(roomInfo);
+  socket.on("join_room", (roomInfo) => {
     socket.join(roomInfo);
   });
 
@@ -42,27 +41,23 @@ io.on("connect", (socket) => {
     socket.to(`${bookingInfo.shopId}`).emit("check_queue", editBookingInfo);
   });
 
-  socket.on("booking_for_customer", (bookingInfo, seat) => {
-    // console.log(bookingInfo, seat);
+  socket.on("booking_for_customer", ({ bookingInfo }, seat, name) => {
     const editBookingInfo = {
-      name: bookingInfo.name,
-      userId: bookingInfo.userId,
+      name,
       shopId: bookingInfo.shopId,
       queueNumber: "",
       seat,
       type: bookingInfo.type,
-      socket: bookingInfo.socket,
       date: dayjs().format("DD MMMM YYYY"),
       time: dayjs().format("h:mm A"),
     };
-
     io.to(`${bookingInfo.shopId}`).emit("check_queue", editBookingInfo);
   });
 
   socket.on("confirm_booking", async (bookingConfirm) => {
     console.log(bookingConfirm);
     const editBookingConfirm = { ...bookingConfirm };
-    keyToDel = ["name", "socket"];
+    keyToDel = ["name"];
     delKeyObj(editBookingConfirm, keyToDel);
     console.log(editBookingConfirm);
     const result = await prisma.resevations.create({
@@ -88,6 +83,11 @@ io.on("connect", (socket) => {
   //     }
   //   );
   // });
+
+  socket.on("vendor_cancel", (socket) => {
+    console.log("test", socket);
+    socket.to(socket).emit("cancel_ticket");
+  });
 
   //!!cancel booking and delete DB_reservation
   socket.on("cancel", async (cancelInfo) => {
