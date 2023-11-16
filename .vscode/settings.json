@@ -1,0 +1,7 @@
+{
+
+    "workbench.colorCustomizations": {
+        "statusBar.background": "#21cb15", // Change to the color you want
+        "titleBar.activeBackground": "#21cb15" // Change to the color you want
+    }
+}

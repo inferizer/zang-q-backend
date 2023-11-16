@@ -57,4 +57,12 @@ const GoogleLoginSchema = Joi.object({
 })
 
 exports.GoogleLoginSchema = GoogleLoginSchema
+
+const UserEditSchema = Joi.object({
+  username:Joi.string(),
+  email:Joi.string().email(),
+  mobile:Joi.string().pattern(/^[0-9]{10}$/)
+})
+
+exports.UserEditSchema = UserEditSchema
 // userSchema , adminShcema ,venderSchem
