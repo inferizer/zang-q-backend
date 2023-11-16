@@ -18,10 +18,10 @@ app.use(express.json());
 app.use(morgan("dev"));
 
 app.use("/auth", authRoute);
-app.use("/vendor", vendorRoute);
-app.use("/test", testRoute);
-app.use("/admin", adminRoute);
-app.use("/user", userRoute);
+app.use("/vendor",vendorRoute);
+app.use('/test',testRoute)
+app.use('/admin',adminRoute)
+app.use('/user',userRoute)
 
 app.use(notFoundMiddleware);
 app.use(errorMiddleware);

@@ -7,8 +7,6 @@ const {
 } = require("../validator/admin-validator");
 const prisma = require("../models/prisma");
 const createError = require("../utils/create-error");
-const { exist } = require("joi");
-const { createLogger } = require("redux-logger");
 const PENDING = "pending";
 const APPROVED = "approved";
 const ADMIN = "admin";
@@ -44,6 +42,7 @@ exports.login = async (req, res, next) => {
     if (!user) {
       return next(createError("invalid Login", 400));
     }
+
     const compareMatch = bcrypt.compare(value.password, user.password);
     if (!compareMatch) return next(createError("invalid Login", 400));
     const payload = { userId: user.id };
