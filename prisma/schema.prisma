@@ -9,7 +9,7 @@ datasource db {
 
 model Users {
   id           Int           @id @default(autoincrement())
-  username     String?
+  username     String?       
   email        String?       @unique
   mobile       String?       @unique
   facebookId   String?
@@ -39,7 +39,6 @@ model Resevations {
   seat        Int
   socket      String?
 }
-
 model Shops {
   id                  Int               @id @default(autoincrement())
   registerationNumber String?
@@ -89,6 +88,7 @@ model Categories {
 enum Role {
   user
   admin
+  super_admin
 }
 
 enum Status {

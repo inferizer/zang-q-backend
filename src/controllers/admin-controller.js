@@ -7,8 +7,6 @@ const {
 } = require("../validator/admin-validator");
 const prisma = require("../models/prisma");
 const createError = require("../utils/create-error");
-const { exist } = require("joi");
-const { createLogger } = require("redux-logger");
 const PENDING = "pending";
 const APPROVED = "approved";
 const ADMIN = "admin";
@@ -44,12 +42,13 @@ exports.login = async (req, res, next) => {
     if (!user) {
       return next(createError("invalid Login", 400));
     }
+
     const compareMatch = bcrypt.compare(value.password, user.password);
     if (!compareMatch) return next(createError("invalid Login", 400));
     const payload = { userId: user.id };
     const accessToken = createToken(payload);
     delete user.password;
-    res.status(200).json({ accessToken, msg: "Welcome Admin!!!",user });
+    res.status(200).json({ accessToken, msg: "Welcome Admin!!!", user });
   } catch (err) {
     next(err);
   }
@@ -81,7 +80,7 @@ exports.rejectApplication = async (req, res, next) => {
       return next(
         createError("no application submitted from this vendor", 400)
       );
-        console.log(existApplication)
+    console.log(existApplication);
     await prisma.shops.deleteMany({
       where: {
         id: existApplication.id,
@@ -89,10 +88,10 @@ exports.rejectApplication = async (req, res, next) => {
     });
 
     await prisma.shopsCategories.deleteMany({
-      where:{
-        shopsId: +id
-      }
-    })
+      where: {
+        shopsId: +id,
+      },
+    });
 
     const result = await prisma.shops.findMany({
       where: {
@@ -125,7 +124,7 @@ exports.approvedApplication = async (req, res, next) => {
     await prisma.shops.update({
       where: { id: existApplication.id },
       data: {
-        isApprove: "approved",
+        isApprove: APPROVED,
       },
     });
 
@@ -157,16 +156,31 @@ exports.getAllPendingShopApplication = async (req, res, next) => {
   res.status(200).json({ result });
 };
 
-exports.getAllCategory =  async( req,res,next) =>{
+exports.getAllApprovedShopApplication = async (req, res, next) => {
+  const { role } = req.user;
+  if (role != ADMIN)
+    return next(createError)(
+      "Only admin is allowed to perform this action",
+      400
+    );
+  const result = await prisma.shops.findMany({
+    where: {
+      isApprove: APPROVED,
+    },
+  });
+
+  res.status(200).json({ result });
+};
+
+exports.getAllCategory = async (req, res, next) => {
   const { role } = req.user;
   if (role != ADMIN)
     return next(
       createError("Only admin is allowed to perform this action", 400)
     );
-    const result = await prisma.categories.findMany()
-    res.status(200).json({result})
-
-}
+  const result = await prisma.categories.findMany();
+  res.status(200).json({ result });
+};
 
 exports.createCategory = async (req, res, next) => {
   const { role } = req.user;
@@ -181,72 +195,69 @@ exports.createCategory = async (req, res, next) => {
     if (value.name.toUpperCase() == i.name.toUpperCase())
       return next(createError("category already exist", 400));
   }
-   await prisma.categories.create({
+  await prisma.categories.create({
     data: value,
   });
 
-  const result = await prisma.categories.findMany()
+  const result = await prisma.categories.findMany();
   res.status(200).json({ result });
 };
-exports.updateCategory = async (req,res,next) => {
-  try{
-
+exports.updateCategory = async (req, res, next) => {
+  try {
     const { role } = req.user;
-    const {id,name} = req.body
+    const { id, name } = req.body;
     if (role != ADMIN)
-    return next(createError ("Only admin is allowed to perform this action",400))
-  
-  const selectedCategory = await prisma.categories.findUnique({
-    where:{
-      id:id
-    }
-  })
-  if(!selectedCategory) return next(createError("please provide valid category",400))
-  await prisma.categories.update({
-where:{
-  id:selectedCategory.id
-},
-data:{
-  name:name
-}
-})
-const result = await prisma.categories.findMany()
-res.status(200).json({result})
+      return next(
+        createError("Only admin is allowed to perform this action", 400)
+      );
 
-
-}
-catch(err){
-  console.log(err)
-}
+    const selectedCategory = await prisma.categories.findUnique({
+      where: {
+        id: id,
+      },
+    });
+    if (!selectedCategory)
+      return next(createError("please provide valid category", 400));
+    await prisma.categories.update({
+      where: {
+        id: selectedCategory.id,
+      },
+      data: {
+        name: name,
+      },
+    });
+    const result = await prisma.categories.findMany();
+    res.status(200).json({ result });
+  } catch (err) {
+    console.log(err);
+  }
 };
-exports.deleteCategory = async (req,res,next) => {
-  try{
-
+exports.deleteCategory = async (req, res, next) => {
+  try {
     const { role } = req.user;
-    const {id} = req.params 
+    const { id } = req.params;
     if (role != ADMIN)
-    return next(createError(
-  "Only admin is allowed to perform this action",
-  400
-  ))
-  
-  const selectedCategory = await prisma.categories.findFirst({
-    where:{
-      id:+id
-    }
-  })
-  if(!selectedCategory) return next(createError("please provide valid category",400))
-  await prisma.categories.delete({
-where:{
-  id: selectedCategory.id
-}})
+      return next(
+        createError("Only admin is allowed to perform this action", 400)
+      );
 
-const result  = await prisma.categories.findMany()
+    const selectedCategory = await prisma.categories.findFirst({
+      where: {
+        id: +id,
+      },
+    });
+    if (!selectedCategory)
+      return next(createError("please provide valid category", 400));
+    await prisma.categories.delete({
+      where: {
+        id: selectedCategory.id,
+      },
+    });
 
-res.status(200).json({result})
-}
-catch(err){
-  console.log(err)
-}
+    const result = await prisma.categories.findMany();
 
+    res.status(200).json({ result });
+  } catch (err) {
+    console.log(err);
+  }
 };
