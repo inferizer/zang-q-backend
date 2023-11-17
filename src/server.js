@@ -91,6 +91,7 @@ io.on("connect", (socket) => {
 
   //!!cancel booking and delete DB_reservation
   socket.on("cancel", async (cancelInfo) => {
+    console.log(cancelInfo);
     io.to(`${cancelInfo.shopId}`).emit("cancel_queue", {
       userId: cancelInfo.userId,
     });
@@ -107,5 +108,5 @@ io.on("connect", (socket) => {
 });
 // socket.io >>>>>>>>>>>>>>>>>>
 
-const PORT = process.env.PORT || "5000";
+const PORT = process.env.PORT || "4000";
 server.listen(PORT, () => console.log(`server running on port: ${PORT}`));
