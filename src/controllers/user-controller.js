@@ -21,12 +21,14 @@ exports.getallShop = async (req, res, next) => {
 };
 
 exports.getallCategory = async (req, res, next) => {
+  try{
   const result = await prisma.categories.findMany({
     include: {
       ShopsCategories: {
         include: {
           shop: {
             select: {
+              id:true,
               shopPicture: true,
               shopName: true,
               isApprove: true,
@@ -35,12 +37,14 @@ exports.getallCategory = async (req, res, next) => {
         },
       },
     },
-    where: {
-      isApprove: "approved",
-    },
+
   });
 
   res.status(200).json({ result });
+}
+catch(err){
+  next(err)
+}
 };
 
 exports.resevation = async (req, res, next) => {

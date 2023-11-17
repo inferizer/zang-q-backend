@@ -21,3 +21,13 @@ const vendorLoginSchema = Joi.object({
 });
 
 exports.vendorLoginSchema = vendorLoginSchema;
+
+// const vendorEditSchema = Joi.object({
+//   shopMobile: Joi.string().pattern(/^[0-9]{10}$/),
+//   openingTimes: Joi.string(),
+//   closingTimes: Joi.string(),
+//   ownerFirstName: Joi.string(),
+//   ownerLastName: Joi.string(),
+//   shopLan
+
+// })

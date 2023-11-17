@@ -13,6 +13,7 @@ const createError = require("../utils/create-error");
 const VENDOR = "vendor";
 const dayjs = require("dayjs");
 const utc = require("dayjs/plugin/utc");
+const { exist } = require("joi");
 dayjs.extend(utc);
 const categories_id_validation = async (data) => {
   const existcategories = await prisma.categories.findMany();
@@ -112,6 +113,8 @@ exports.login = async (req, res, next) => {
 };
 
 exports.application = async (req, res, next) => {
+
+  console.log(req.body)
   try {
     const { role } = req.user;
 
@@ -248,9 +251,26 @@ exports.getMyShop = async (req, res, next) => {
   try {
     const result = await prisma.shops.findMany({
       where: {
-        shopAccountId: id,
+        shopAccountId:id,
       },
     });
+    res.status(201).json({ result })
+  } catch (err) {
+    console.log(err)
+  }
+}
+
+exports.getSingleShop = async (req,res,next) =>{
+  const { id } = req.params
+
+  
+  try {
+    const result = await prisma.shops.findMany({
+      where: {
+        id: +id,
+      },
+    });
+
     res.status(201).json({ result })
   } catch (err) {
     console.log(err)
@@ -354,3 +374,30 @@ exports.historyResevation  =  async (req, res, next) => {
     console.log(err)
   }
 } 
+
+
+exports.vendorEdit = async(req,res,next) =>{
+  try{
+    const {id} = req.params
+    const data = {}
+    const existUser = await prisma.shopAccount.findUnique({
+      where:{
+        id: +id
+      }
+    })
+    if(!existUser) return next(createError("this user does not exist"))
+
+    if(req.files){
+
+    }
+
+    if(!req.files){
+
+    }
+
+  }
+  catch(err){
+    next(err)
+
+  }
+}
