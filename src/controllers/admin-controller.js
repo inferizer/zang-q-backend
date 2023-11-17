@@ -14,6 +14,7 @@ const ADMIN = "admin";
 exports.register = async (req, res, next) => {
   try {
     const { value, error } = adminRegisterSchema.validate(req.body);
+    console.log(value);
     if (error) return next(error);
     value.password = await bcrypt.hash(value.password, 10);
     const user = await prisma.users.create({

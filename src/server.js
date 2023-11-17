@@ -22,6 +22,7 @@ io.on("connect", (socket) => {
   // });
 
   socket.on("join_room", (roomInfo) => {
+    console.log(roomInfo);
     socket.join(roomInfo);
   });
 
