@@ -91,6 +91,7 @@ io.on("connect", (socket) => {
 
   //!!cancel booking and delete DB_reservation
   socket.on("cancel", async (cancelInfo) => {
+    console.log(cancelInfo);
     io.to(`${cancelInfo.shopId}`).emit("cancel_queue", {
       userId: cancelInfo.userId,
     });
